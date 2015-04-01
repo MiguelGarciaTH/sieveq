@@ -1,0 +1,8 @@
+
+core.attacker.target.ip=192.168.2.21
+core.attacker.target.port=11010
+
+core.crypto.scheme=none
+ 
+core.attacker.payload=10
+
