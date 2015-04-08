@@ -4,6 +4,7 @@
  */
 package core.management;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author miguel
  */
-public class RouteTable {
+public class RouteTable implements Serializable{
     //<src, dsts>
 
     private ConcurrentHashMap<Integer, LinkedList<Integer>> route;

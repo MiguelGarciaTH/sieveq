@@ -8,6 +8,7 @@ package core.modules.crypto;
 import core.message.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -25,7 +26,7 @@ import javax.crypto.ShortBufferException;
  *
  * @author miguel
  */
-public class CryptoSchemeFive extends CryptoScheme {
+public class CryptoSchemeFive extends CryptoScheme implements Serializable{
 
     private byte[] local_data, local_mac, local_signature, mac2;
     private ByteBuffer complete;

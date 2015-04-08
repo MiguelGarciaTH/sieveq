@@ -73,21 +73,23 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
 //        this.replicaContext = replicaContext;
     }
 
-    private byte[] execute(TOMMessage cmd) {
-        
-        inCrypto.add(cmd);
+    @Override
+    public byte[] appExecuteOrdered(TOMMessage command, MessageContext msgCtx) {
+        inCrypto.add(command);
         return null;
     }
 
-    @Override
-    public byte[] executeOrdered(TOMMessage command, MessageContext msgCtx) {
-        return execute(command);
-    }
-
-    @Override
-    public byte[] executeUnordered(TOMMessage command, MessageContext msgCtx) {
-        return execute(command);
-    }
+//    @Override
+//    public byte[] executeOrdered(TOMMessage command, MessageContext msgCtx) {
+//        inCrypto.add(command);
+//        return null;
+//    }
+//
+//    @Override
+//    public byte[] executeUnordered(TOMMessage command, MessageContext msgCtx) {
+//        inCrypto.add(command);
+//        return null;
+//    }
 
     @Override
     public void installSnapshot(byte[] state) {
@@ -97,13 +99,13 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             // serialize to byte array and return
             ByteArrayInputStream bis = new ByteArrayInputStream(state);
             ObjectInput in = new ObjectInputStream(bis);
-            ID = (int) in.readObject();
+//            ID = (int) in.readObject();
             route = (RouteTable) in.readObject();
             connected = (HashMap<Integer, Integer>) in.readObject();
-            sharedID = (int) in.readObject();
-            replicaContext = (ReplicaContext) in.readObject();
-            crypto = (CryptoScheme) in.readObject();
-            malicious = (Malicious) in.readObject();
+//            sharedID = (int) in.readObject();
+//            replicaContext = (ReplicaContext) in.readObject();
+//            crypto = (CryptoScheme) in.readObject();
+//            malicious = (Malicious) in.readObject();
             this.out = (ArrayBlockingQueue) in.readObject();
             inCrypto = (ArrayBlockingQueue) in.readObject();
             outCrypto = (ArrayBlockingQueue) in.readObject();
@@ -125,20 +127,20 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutput out = new ObjectOutputStream(bos);
-            out.writeObject(ID);
-            out.flush();
+//            out.writeObject(ID);
+//            out.flush();
             out.writeObject(route);
             out.flush();
             out.writeObject(connected);
             out.flush();
-            out.writeObject(sharedID);
-            out.flush();
-            out.writeObject(replicaContext);
-            out.flush();
-            out.writeObject(crypto);
-            out.flush();
-            out.writeObject(malicious);
-            out.flush();
+//            out.writeObject(sharedID);
+//            out.flush();
+//            out.writeObject(replicaContext);
+//            out.flush();
+//            out.writeObject(crypto);
+//            out.flush();
+//            out.writeObject(malicious);
+//            out.flush();
             out.writeObject(this.out);
             out.flush();
             out.writeObject(inCrypto);
@@ -158,8 +160,4 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
         }
     }
 
-    @Override
-    public byte[] appExecuteOrdered(byte[] command, MessageContext msgCtx) {
-        return executeOrdered(command, msgCtx);
-    }
 }
