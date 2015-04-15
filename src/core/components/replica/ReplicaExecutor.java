@@ -38,7 +38,7 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
     protected RouteTable route;
     protected TreeMap<Integer, Integer> connected;
     protected int sharedID = 0;
-    protected ReplicaContext replicaContext;
+//    protected ReplicaContext replicaContext;
     protected CryptoScheme crypto;
     protected Malicious malicious;
     // protected MessageContext msgCtx;
@@ -47,12 +47,12 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
     private WorkerPool workers;
     private Executor exec;
     protected ArrayBlockingQueue out, inCrypto, outCrypto;
-    protected ConcurrentHashMap<Integer, LinkedList<Integer>> route_struct;
+    protected TreeMap<Integer, LinkedList<Integer>> route_struct;
 
     public ReplicaExecutor(int id) {
         this.ID = id;
         this.replica = new ServiceReplica(id, this, this, true);
-        this.route_struct = new ConcurrentHashMap<Integer, LinkedList<Integer>>();
+        this.route_struct = new TreeMap<Integer, LinkedList<Integer>>();
         this.route = new RouteTable(route_struct);
         this.connected = new TreeMap<Integer, Integer>();
         this.crypto = CryptoSchemeFactory.getCryptoScheme(null);
@@ -83,14 +83,16 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             ByteArrayInputStream bis = new ByteArrayInputStream(state);
             ObjectInput in = new ObjectInputStream(bis);
             this.state = (int) in.readInt();
-            route = (RouteTable) in.readObject();
-            connected = (TreeMap<Integer, Integer>) in.readObject();
-            this.out = (ArrayBlockingQueue) in.readObject();
-            this.inCrypto = (ArrayBlockingQueue) in.readObject();
-            this.outCrypto = (ArrayBlockingQueue) in.readObject();
+            this.route = (RouteTable) in.readObject();
+            this.connected = (TreeMap<Integer, Integer>) in.readObject();
+//            this.out = (ArrayBlockingQueue) in.readObject();
+//            this.inCrypto = (ArrayBlockingQueue) in.readObject();
+//            this.outCrypto = (ArrayBlockingQueue) in.readObject();
+            this.route_struct = (TreeMap<Integer, LinkedList<Integer>>) in.readObject();
+//            this.workers = (WorkerPool) in.readObject();
+//            this.exec = (Executor) in.readObject();
             in.close();
             bis.close();
-
         } catch (Exception ex) {
             System.out.println("Install snapshot:");
             ex.printStackTrace();
@@ -109,13 +111,17 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             out.flush();
             out.writeObject(connected);
             out.flush();
-            out.writeObject(this.out);
+//            out.writeObject(this.out);
+//            out.flush();
+//            out.writeObject(this.inCrypto);
+//            out.flush();
+//            out.writeObject(this.outCrypto);
+//            out.flush();
+            out.writeObject(this.route_struct);
             out.flush();
-            out.writeObject(this.inCrypto);
-            out.flush();
-            out.writeObject(this.outCrypto);
-            out.flush();
-//            out.writeObject(route_struct);
+//            out.writeObject(this.workers);
+//            out.flush();
+//            out.writeObject(this.exec);
 //            out.flush();
             bos.flush();
             out.close();

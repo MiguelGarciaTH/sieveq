@@ -49,21 +49,9 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/client/ClientExecutorOneSMART.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/client/network/ClientTCPSend.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/server/ServerExecutorTwo.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/prereplica/network/PreReplicaTCPReceiveThread.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/server/ServerExecutorOne.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/client/ClientExecutorOne.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/prereplica/network/PreReplicaTCPSend.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/prereplica/network/PreReplicaTCPReceiveClients.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/server/ServerReplyManager.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/client/ClientExecutor.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/prereplica/PreReplica.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/client/ClientExecutorTwo.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/prereplica/PreReplicaExecutorThree.java</file>
+            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/workerpool/WorkerPool.java</file>
             <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/replica/ReplicaExecutor.java</file>
-            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/config_local/system.config</file>
+            <file>file:/home/miguel/Dropbox/NetBeansProjects/Core-MIS/src/core/components/workerpool/WorkerFactory.java</file>
         </group>
     </open-files>
 </project-private>
