@@ -16,6 +16,7 @@ import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.modules.malicious.Malicious;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -70,6 +71,7 @@ public class PreReplicaExecutorThree implements ReplyListener, Runnable {
         new Thread(snd).start();
         try {
             processes = proxy.getViewManager().getCurrentViewProcesses();
+            System.out.println("Processes="+Arrays.toString(processes));
             while (true) {
                 ByteArrayWrap dataWrap;
                 try {

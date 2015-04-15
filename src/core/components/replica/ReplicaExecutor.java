@@ -4,7 +4,6 @@
  */
 package core.components.replica;
 
-import bftsmart.demo.bftmap.MapOfMaps;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ReplicaContext;
 import bftsmart.tom.ServiceReplica;
@@ -19,17 +18,14 @@ import core.modules.malicious.Malicious;
 import core.modules.malicious.MaliciousFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -40,12 +36,13 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
     protected int ID;
     protected ServiceReplica replica;
     protected RouteTable route;
-    protected HashMap<Integer, Integer> connected;
+    protected TreeMap<Integer, Integer> connected;
     protected int sharedID = 0;
     protected ReplicaContext replicaContext;
     protected CryptoScheme crypto;
     protected Malicious malicious;
     // protected MessageContext msgCtx;
+    private int state = 0;
 
     private WorkerPool workers;
     private Executor exec;
@@ -57,7 +54,7 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
         this.replica = new ServiceReplica(id, this, this, true);
         this.route_struct = new ConcurrentHashMap<Integer, LinkedList<Integer>>();
         this.route = new RouteTable(route_struct);
-        this.connected = new HashMap<Integer, Integer>();
+        this.connected = new TreeMap<Integer, Integer>();
         this.crypto = CryptoSchemeFactory.getCryptoScheme(null);
         this.malicious = MaliciousFactory.getMaliciousModule();
         this.inCrypto = new ArrayBlockingQueue(CoreProperties.queue_size * 2);
@@ -79,85 +76,69 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
         return null;
     }
 
-//    @Override
-//    public byte[] executeOrdered(TOMMessage command, MessageContext msgCtx) {
-//        inCrypto.add(command);
-//        return null;
-//    }
-//
-//    @Override
-//    public byte[] executeUnordered(TOMMessage command, MessageContext msgCtx) {
-//        inCrypto.add(command);
-//        return null;
-//    }
-
     @Override
     public void installSnapshot(byte[] state) {
         System.out.println("Recovering state");
         try {
-
-            // serialize to byte array and return
             ByteArrayInputStream bis = new ByteArrayInputStream(state);
             ObjectInput in = new ObjectInputStream(bis);
-//            ID = (int) in.readObject();
+            this.state = (int) in.readInt();
             route = (RouteTable) in.readObject();
-            connected = (HashMap<Integer, Integer>) in.readObject();
-//            sharedID = (int) in.readObject();
-//            replicaContext = (ReplicaContext) in.readObject();
-//            crypto = (CryptoScheme) in.readObject();
-//            malicious = (Malicious) in.readObject();
+            connected = (TreeMap<Integer, Integer>) in.readObject();
             this.out = (ArrayBlockingQueue) in.readObject();
-            inCrypto = (ArrayBlockingQueue) in.readObject();
-            outCrypto = (ArrayBlockingQueue) in.readObject();
-            route_struct = (ConcurrentHashMap<Integer, LinkedList<Integer>>) in.readObject();
-
+            this.inCrypto = (ArrayBlockingQueue) in.readObject();
+            this.outCrypto = (ArrayBlockingQueue) in.readObject();
             in.close();
             bis.close();
 
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ReplicaExecutor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ReplicaExecutor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            System.out.println("Install snapshot:");
+            ex.printStackTrace();
         }
     }
 
     @Override
     public byte[] getSnapshot() {
-        System.out.println("Making state snapshot");
+        System.out.println("Saving state:" + this.state++);
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutput out = new ObjectOutputStream(bos);
-//            out.writeObject(ID);
-//            out.flush();
+            out.writeInt(this.state);
+            out.flush();
             out.writeObject(route);
             out.flush();
             out.writeObject(connected);
             out.flush();
-//            out.writeObject(sharedID);
-//            out.flush();
-//            out.writeObject(replicaContext);
-//            out.flush();
-//            out.writeObject(crypto);
-//            out.flush();
-//            out.writeObject(malicious);
-//            out.flush();
             out.writeObject(this.out);
             out.flush();
-            out.writeObject(inCrypto);
+            out.writeObject(this.inCrypto);
             out.flush();
-            out.writeObject(outCrypto);
+            out.writeObject(this.outCrypto);
             out.flush();
-            out.writeObject(route_struct);
-            out.flush();
-
+//            out.writeObject(route_struct);
+//            out.flush();
             bos.flush();
             out.close();
             bos.close();
+//            printState();
             return bos.toByteArray();
-        } catch (IOException ex) {
-            Logger.getLogger(ReplicaExecutor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            System.out.println("load snapshot:");
+            ex.printStackTrace();
             return new byte[0];
         }
     }
 
+    private void printState() {
+        if (route != null) {
+            System.out.println("State:");
+            System.out.println("<<");
+            this.route.prettyPrint();
+            System.out.println("connected size=" + this.connected.size());
+            System.out.println("inCrypto size=" + this.inCrypto.size());
+            System.out.println("outCrypto size=" + this.outCrypto.size());
+//            System.out.println("out size=" + this.out.size());
+            System.out.println(">>");
+        }
+    }
 }

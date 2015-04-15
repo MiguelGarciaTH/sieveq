@@ -7,7 +7,7 @@ package core.management;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RouteTable implements Serializable{
     //<src, dsts>
 
-    private ConcurrentHashMap<Integer, LinkedList<Integer>> route;
+    private ConcurrentMap<Integer, LinkedList<Integer>> route;
 
-    public RouteTable(ConcurrentHashMap<Integer, LinkedList<Integer>> route) {
+    public RouteTable(ConcurrentMap<Integer, LinkedList<Integer>> route) {
         this.route = route;
     }
 
@@ -38,11 +38,13 @@ public class RouteTable implements Serializable{
 
     public void prettyPrint() {
         for (Integer k : route.keySet()) {
-            System.out.println("Key=" + k);
+            System.out.print("Key=[" + k);
             LinkedList<Integer> list = route.get(k);
             for (Integer integer : list) {
-                System.out.println("\tvalue: " + integer);
+                System.out.print(" " + integer);
             }
+            System.out.println("]");
+           
         }
     }
 

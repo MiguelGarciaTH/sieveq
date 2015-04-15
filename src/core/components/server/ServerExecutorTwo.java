@@ -91,6 +91,6 @@ public class ServerExecutorTwo extends ServerExecutor implements Runnable, Reply
 
     private void send(int type, int sequenceNumber, byte[] cmd) {
         Message resp = new Message(type, ID, sequenceNumber, cmd);
-        proxy.invokeAsynchronousLeader(resp.serialize(serialized1), this, new int[]{processes[0]});
+        proxy.invokeAsynchronous(resp.serialize(serialized1), this, new int[]{processes[0]});
     }
 }

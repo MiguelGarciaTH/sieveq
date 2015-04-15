@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +36,7 @@ public class ExecutorReplierOne implements Runnable, Replier {
 
     private ArrayBlockingQueue out;
     private ServerCommunicationSystem comm;
-    private HashMap<Integer, Integer> connected;
+    private TreeMap<Integer, Integer> connected;
     private int sharedID;
     private RouteTable route;
     private ServiceReplica replica;
@@ -50,7 +51,7 @@ public class ExecutorReplierOne implements Runnable, Replier {
     protected Malicious malicious;
     private int attackedCounter;
 
-    public ExecutorReplierOne(ArrayBlockingQueue out, HashMap<Integer, Integer> connected, int sharedID, RouteTable route, ServiceReplica replica, Malicious malicious) {
+    public ExecutorReplierOne(ArrayBlockingQueue out, TreeMap<Integer, Integer> connected, int sharedID, RouteTable route, ServiceReplica replica, Malicious malicious) {
         this.out = out;
         this.connected = connected;
         this.sharedID = sharedID;

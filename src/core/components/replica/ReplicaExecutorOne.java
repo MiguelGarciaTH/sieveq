@@ -5,8 +5,6 @@
 package core.components.replica;
 
 import bftsmart.communication.ServerCommunicationSystem;
-import bftsmart.tom.MessageContext;
-import bftsmart.tom.core.messages.TOMMessage;
 
 /**
  *

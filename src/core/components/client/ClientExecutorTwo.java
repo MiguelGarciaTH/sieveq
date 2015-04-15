@@ -28,7 +28,7 @@ public class ClientExecutorTwo extends ClientExecutor implements Runnable, Reply
 
     @Override
     void send(byte[] cmd) {
-        proxy.invokeAsynchronousLeader(cmd, this, new int[]{processes[0]}); // find some way to find who is the lider.
+        proxy.invokeAsynchronous(cmd, this, processes); // find some way to find who is the lider.
     }
 
     @Override

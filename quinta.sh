@@ -48,6 +48,7 @@ elif [ "$1" = "clear" ]; then
 else
 	for i in $QUINTA 
 	do
+		ssh $i.quinta rm ~/Core-MIS/config/currentView
 		scp -r * $i.quinta:~/Core-MIS
 		echo $i ": scp Core-MIS complete"
 	done

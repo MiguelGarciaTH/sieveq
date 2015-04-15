@@ -137,11 +137,11 @@ public class ServerReplyManager implements Runnable {
                             one = true;
                             CoreConfiguration.print("End ack to=" + resp.getSrc());
                             resp = new Message(Message.END_ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), new byte[]{0});
-                            if (primaryBackup) {
-                                proxy.invokeAsynchronousLeader(resp.serialize(serialized1), reply, new int[]{processes[0]});
-                            } else {
+//                            if (primaryBackup) {
+//                                proxy.invokeAsynchronous(resp.serialize(serialized1), reply, new int[]{processes[0]});
+//                            } else {
                                 proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
-                            }
+//                            }
                             CoreConfiguration.print("**FINISH**");
                             sessions.remove(resp.getSrc());
                         }

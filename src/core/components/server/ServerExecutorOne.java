@@ -11,7 +11,6 @@ import core.message.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 

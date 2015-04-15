@@ -8,7 +8,6 @@ import core.components.workerpool.ThreadBlockQueue;
 import core.management.BlackList;
 import core.message.Message;
 import core.management.CoreConfiguration;
-import core.message.ByteArrayWrap;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;

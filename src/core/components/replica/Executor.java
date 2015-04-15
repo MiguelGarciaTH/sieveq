@@ -15,6 +15,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -25,12 +26,12 @@ public class Executor implements Runnable {
 
     private ArrayBlockingQueue in, out;
     private RouteTable route;
-    private HashMap<Integer, Integer> connected;
+    private TreeMap<Integer, Integer> connected;
     private ServerViewManager SVM;
     protected ByteBuffer deserialized = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
     protected ByteBuffer serialized1 = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
 
-    public Executor(ArrayBlockingQueue in, ArrayBlockingQueue out, RouteTable route, HashMap<Integer, Integer> connected, ServerViewManager SVM) {
+    public Executor(ArrayBlockingQueue in, ArrayBlockingQueue out, RouteTable route, TreeMap<Integer, Integer> connected, ServerViewManager SVM) {
         this.in = in;
         this.out = out;
         this.route = route;
