@@ -55,7 +55,7 @@ scripts/core-mis.sh 2 client 5 config/client.properties 6
 
 ## Mode 3 - Demo version, one client, one pre-replica (pre-filter) TOM to replicas and Server ####
 First, launch the replicas:
-
+```bash
 scripts/core-mis.sh 3 replica 0 config/replica.properties
 
 scripts/core-mis.sh 3 replica 1 config/replica.properties
