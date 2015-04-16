@@ -79,6 +79,7 @@ public class ServerReplyManager implements Runnable {
         while (true) {
             try {
                 resp = (Message) inQueue.take();
+//                System.out.println("Resp src="+resp.getSrc());
                 switch (resp.getType()) {
                     case Message.HELLO_ACK:
                         CoreConfiguration.print("Hello ack received");

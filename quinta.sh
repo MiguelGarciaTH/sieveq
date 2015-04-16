@@ -60,8 +60,8 @@ elif [ "$1" = "clear" ]; then
 else
 	for i in $QUINTA 
 	do
-		ssh $i.quinta rm Core-MIS/config/currentView
-		rsync -aL -d --delete * $i.quinta:~/Core-MIS
+		ssh $i.quinta rm /root/Core-MIS/config/currentView
+		rsync -aL -d --delete * $i.quinta:/root/Core-MIS
 		echo $i ": scp Core-MIS complete"
 	done
 fi

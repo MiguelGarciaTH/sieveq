@@ -78,6 +78,7 @@ public class ServerExecutorOne extends ServerExecutor {
         byte[] data = reply.getContent();
         try {
             Message resp = validate(data);
+//            System.out.println("Receiving message="+resp.getSeqNumber() + ": src="+resp.getSrc());
             firstQueue.put(resp);
         } catch (InterruptedException ex) {
             firstQueue.clear();

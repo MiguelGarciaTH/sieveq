@@ -25,7 +25,6 @@ import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -85,12 +84,7 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             this.state = (int) in.readInt();
             this.route = (RouteTable) in.readObject();
             this.connected = (TreeMap<Integer, Integer>) in.readObject();
-//            this.out = (ArrayBlockingQueue) in.readObject();
-//            this.inCrypto = (ArrayBlockingQueue) in.readObject();
-//            this.outCrypto = (ArrayBlockingQueue) in.readObject();
             this.route_struct = (TreeMap<Integer, LinkedList<Integer>>) in.readObject();
-//            this.workers = (WorkerPool) in.readObject();
-//            this.exec = (Executor) in.readObject();
             in.close();
             bis.close();
         } catch (Exception ex) {
@@ -111,22 +105,11 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             out.flush();
             out.writeObject(connected);
             out.flush();
-//            out.writeObject(this.out);
-//            out.flush();
-//            out.writeObject(this.inCrypto);
-//            out.flush();
-//            out.writeObject(this.outCrypto);
-//            out.flush();
             out.writeObject(this.route_struct);
             out.flush();
-//            out.writeObject(this.workers);
-//            out.flush();
-//            out.writeObject(this.exec);
-//            out.flush();
             bos.flush();
             out.close();
             bos.close();
-//            printState();
             return bos.toByteArray();
         } catch (Exception ex) {
             System.out.println("load snapshot:");
@@ -141,9 +124,7 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             System.out.println("<<");
             this.route.prettyPrint();
             System.out.println("connected size=" + this.connected.size());
-//            System.out.println("inCrypto size=" + this.inCrypto.size());
-//            System.out.println("outCrypto size=" + this.outCrypto.size());
-//            System.out.println("out size=" + this.out.size());
+
             System.out.println(">>");
         }
     }
