@@ -11,7 +11,7 @@ Type: replica BFT-SMART, Server, First
 
 IDs: in client type the client should provide the server ID to connect. 
 
-<!-(
+<!---
 ## Mode 1 - simple, one client TOM to replicas and Server ####
 First, launch the replicas:
 
@@ -63,8 +63,8 @@ scripts/core-mis.sh 2 server 6 config/server.properties
 Third, launch the client:
 
 scripts/core-mis.sh 2 client 5 config/client.properties 6
+-->
 
-)-->
 ## Mode 3 - Demo version, one client, one pre-replica (pre-filter) TOM to replicas and Server ####
 First, launch the replicas:
 
