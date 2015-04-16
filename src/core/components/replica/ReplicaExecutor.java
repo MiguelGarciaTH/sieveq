@@ -141,8 +141,8 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             System.out.println("<<");
             this.route.prettyPrint();
             System.out.println("connected size=" + this.connected.size());
-            System.out.println("inCrypto size=" + this.inCrypto.size());
-            System.out.println("outCrypto size=" + this.outCrypto.size());
+//            System.out.println("inCrypto size=" + this.inCrypto.size());
+//            System.out.println("outCrypto size=" + this.outCrypto.size());
 //            System.out.println("out size=" + this.out.size());
             System.out.println(">>");
         }

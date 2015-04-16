@@ -1,14 +1,26 @@
 #!/bin/bash
-#QUINTA="s6 s9 s10 s11 s12 s13 s7 s8"
-QUINTA="r1 s1"
-#TOKILL="s6 s9 s10 s11 s12 s13 s7 s8"
-SERVER="s1" 
-#"s9"
-CLIENT="r1"
- #"s6"
+#*s6       on       anogueira                         Mar 24, 2014              
+#*s7       on       anogueira        ubuntu-odl       Mar 25, 2015     deployed 
+#*s8       on       anogueira        ubuntu-odl       Mar 26, 2015     deployed 
+#*s9       on       anogueira                         May 28, 2014              
+#*s10      on       anogueira        ubuntu-12.04     Mar 31, 2015     deployed 
+#*s11      on       anogueira        ubuntu-12.04     Mar 31, 2015     deployed 
+#*s12      on       anogueira        ubuntu-12.04     Mar 31, 2015     deployed 
+#*s13      on       anogueira                         Mar 31, 2015     deployed 
+
+QUINTA="s6 s9 s10 s11 s12 s13 s7 s8"
+#QUINTA="r1 s1"
+TOKILL="s6 s9 s10 s11 s12 s13 s7 s8"
+#SERVER="s1" 
+SERVER="s9"
+#CLIENT="r1"
+CLIENT="s6"
+
 CONTROLLER="s7"
-PREREPLICA="s1" #"s7 s8"
-ATTACKER="s17"
+#PREREPLICA="s1" 
+PREREPLICA="s7 s8"
+
+#ATTACKER="s17"
 IMGS="/media/miguel/MIGUEL/Papers/Author/Journals/2015-core-mis/IEEE_2/imgs/gnuplot/plots/"
 PUB_KEY=miguelgarcia.pub
 
@@ -48,8 +60,8 @@ elif [ "$1" = "clear" ]; then
 else
 	for i in $QUINTA 
 	do
-		ssh $i.quinta rm ~/Core-MIS/config/currentView
-		scp -r * $i.quinta:~/Core-MIS
+		ssh $i.quinta rm Core-MIS/config/currentView
+		rsync -aL -d --delete * $i.quinta:~/Core-MIS
 		echo $i ": scp Core-MIS complete"
 	done
 fi
