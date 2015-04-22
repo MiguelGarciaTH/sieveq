@@ -53,9 +53,9 @@ public class CryptoWorkerReplica extends Worker {
                         if (wrap.getSize() < 250 && wrap.getSize() > 0) {
                             if (!crypto.filterVerifyMessage(wrap.getArr(), wrap.getSize())) {
                                 CoreConfiguration.print("Verification error TID=" + tid);
-                                message.setConent(new Message(Message.ERROR, CoreConfiguration.ID, CoreConfiguration.ID, command).serialize(serialized1));
+                                message.setContent(new Message(Message.ERROR, CoreConfiguration.ID, CoreConfiguration.ID, command).serialize(serialized1));
                             } else {
-                                message.setConent(wrap.getArr());
+                                message.setContent(wrap.getArr());
                                 out.add(message);
                             }
                         }
@@ -68,7 +68,7 @@ public class CryptoWorkerReplica extends Worker {
                                 out.add(message);
                             } else {
                                 ByteArrayWrap wrap = new ByteArrayWrap().deserialize(deserliazedBuf, command);
-                                message.setConent(wrap.getArr());
+                                message.setContent(wrap.getArr());
                                 out.add(message);
                             }
                         }

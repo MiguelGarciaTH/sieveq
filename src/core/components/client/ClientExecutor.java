@@ -12,8 +12,7 @@ import core.message.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.massif.OGEvemtGenerator;
-import core.modules.experiments.LatencyExperiments;
-import core.modules.experiments.ThroughputExperiments;
+import core.modules.experiments.Experiment;
 import core.modules.malicious.Malicious;
 import core.modules.voter.SimpleVoter;
 import java.nio.ByteBuffer;
@@ -39,8 +38,9 @@ public abstract class ClientExecutor implements Runnable {
     protected ConcurrentHashMap<Integer, ServerSession> sessions;
     protected int destination;
     protected CoreProperties prop;
-    protected ThroughputExperiments throughput;
-    protected LatencyExperiments latency;
+//    protected ThroughputExperiments throughput;
+//    protected LatencyExperiments latency;
+    protected Experiment experiment;
     protected Long[] sent;
     protected long initTime, finishTime;
     private int total;
@@ -55,14 +55,13 @@ public abstract class ClientExecutor implements Runnable {
     protected ThreadBlockQueue threadQueue;
     protected int[] senSeq;
     int msg_len;
-    
+
     private OGEvemtGenerator generator;
 
     ClientExecutor(int ID, int dst) {
         this.ID = ID;
         this.destination = dst;
         this.sessions = new ConcurrentHashMap<>();
-
         this.voter = new SimpleVoter(prop.num_replicas, prop.quorom);
         this.sessions.put(ID, new ServerSession(ID, ID, new int[]{0, 0, 0, 0}, dst, true));
         this.sessions.put(dst, new ServerSession(ID, ID, new int[]{0, 0, 0, 0}, dst, true));
@@ -87,8 +86,9 @@ public abstract class ClientExecutor implements Runnable {
         this.sent = new Long[total + 5];
         this.senSeq = new int[sent.length];
 //        this.throughput = new ThroughputExperiments(false, null, prop.throughput_experiments_file);
-        this.latency = new LatencyExperiments(senSeq, true, sent, null, inQueue, prop.latency_experiments_file);
-        this.generator= new OGEvemtGenerator();
+//        this.latency = new LatencyExperiments(senSeq, true, sent, null, inQueue, prop.latency_experiments_file);
+        this.experiment = new Experiment(CoreProperties.experiment_type, senSeq, sent, inQueue);
+        this.generator = new OGEvemtGenerator();
         this.generator.loadEventFile("./config/maxi-test-log.log");
         this.generator.getStatistics();
     }
@@ -113,10 +113,7 @@ public abstract class ClientExecutor implements Runnable {
             ByteBuffer dst = ByteBuffer.allocate(4);
             new Random().nextBytes(cmd);
             int seq = sessions.get(0).incrementeOutSequenceNumber();
-
-//            new Thread(throughput).start();
-            new Thread(latency).start();
-
+            new Thread(experiment).start();
             send(Message.HELLO, seq, cmd);
             CoreConfiguration.print("HELLO SENT");
             while (lock) {

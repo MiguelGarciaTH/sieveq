@@ -29,9 +29,7 @@ public class ServerExecutorOne extends ServerExecutor {
     private byte[] cmd;
     private CryptoScheme crypto;
 
-
-
-/**
+    /**
      *
      * @param ID
      */
@@ -43,12 +41,12 @@ public class ServerExecutorOne extends ServerExecutor {
         this.orderedQueue = new ArrayBlockingQueue(CoreProperties.queue_size);
         this.firstFilter = new FirstServerFilter(ID, firstQueue, secondQueue, sessions);
         this.secondFilter = new SecondServerFilter(secondQueue, thirdQueue, sessions, voter);
-        //this.order = new OrderQueue(thirdQueue, orderedQueue, CoreProperties.batch_size);
+
         this.replyManager = new ServerReplyManager(this, ID, thirdQueue, sessions, proxy, lock, false);
         this.first = new Thread(firstFilter);
         this.second = new Thread(secondFilter);
         this.third = new Thread(replyManager);
-        // this.fourth = new Thread(order);
+
         this.crypto = CryptoSchemeFactory.getCryptoScheme(null);
         this.cmd = new byte[1]; //resolver depois
     }
@@ -58,7 +56,7 @@ public class ServerExecutorOne extends ServerExecutor {
         first.start();
         second.start();
         third.start();
-        //fourth.start();
+
         new Random().nextBytes(cmd);
         this.processes = proxy.getViewManager().getCurrentViewProcesses();
         send(Message.HELLO, sessions.get(ID).incrementeOutSequenceNumber(), cmd);
@@ -88,7 +86,7 @@ public class ServerExecutorOne extends ServerExecutor {
     }
 
     private Message validate(byte[] data) {
-        return new Message().deserialize(data,deserialized);
+        return new Message().deserialize(data, deserialized);
 //        if (crypto.serverVerifyMessage(data)) {
 //            return Message.deserialize(data);
 //        } else {

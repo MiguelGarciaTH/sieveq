@@ -11,6 +11,7 @@ import core.message.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.misc.Lock;
+import core.modules.experiments.Experiment;
 import core.modules.experiments.LatencyExperiments;
 import core.modules.experiments.ThroughputExperiments;
 import java.nio.ByteBuffer;
@@ -41,9 +42,9 @@ public class ServerReplyManager implements Runnable {
     private ReplyListener reply;
     private boolean primaryBackup;
     private ArrayBlockingQueue experimentQueue;
-    private ThroughputExperiments throughput;
+
     private boolean warmup = true;
-    private LatencyExperiments latency;
+    private Experiment experiment;
 
     private int numberofMessages = 0;
     protected ByteBuffer serialized1 = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
@@ -57,14 +58,10 @@ public class ServerReplyManager implements Runnable {
         this.lock = lock;
         this.proxy = proxy;
         this.reply = aThis;
-
         this.experimentQueue = new ArrayBlockingQueue(total + 5);
-//        this.throughput = new ThroughputExperiments(true, experimentQueue, CoreProperties.throughput_experiments_file);
-        this.latency = new LatencyExperiments(null, false, null, experimentQueue, null, CoreProperties.latency_experiments_file);
-
-        task = new RemindTask();
-        timer = new Timer();
-
+        this.experiment = new Experiment(CoreProperties.experiment_type, null, null, experimentQueue);
+        this.task = new RemindTask();
+        this.timer = new Timer();
     }
 
     @Override
@@ -74,12 +71,10 @@ public class ServerReplyManager implements Runnable {
         Message resp;
         boolean one = false;
         timer.schedule(task, 0, 1000); //delay in milliseconds
-        new Thread(latency).start();
-//      new Thread(throughput).start();
+        new Thread(experiment).start();
         while (true) {
             try {
                 resp = (Message) inQueue.take();
-//                System.out.println("Resp src="+resp.getSrc());
                 switch (resp.getType()) {
                     case Message.HELLO_ACK:
                         CoreConfiguration.print("Hello ack received");
@@ -103,17 +98,14 @@ public class ServerReplyManager implements Runnable {
 
                         break;
                     case Message.SEND_REQUEST:
-//                        if (!warmup) {
                         experimentQueue.add(resp);
                         numberofMessages++;
-//                        }
-//                        if (resp.getSeqNumber() % CoreProperties.ACK_RATE == 0) {
-//                            String ack = resp.getSeqNumber() + "";
-//                            Message resp2 = new Message(Message.ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), ack.getBytes());
-//                            proxy.invokeAsynchronous(resp2.serialize(serialized1), reply, processes);
-//                        }
+                        if (resp.getSeqNumber() % CoreProperties.ACK_RATE == 0) {
+                            String ack = resp.getSeqNumber() + "";
+                            Message resp2 = new Message(Message.ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), ack.getBytes());
+                            proxy.invokeAsynchronous(resp2.serialize(serialized1), reply, processes);
+                        }
                         break;
-
                     case Message.CHG_PREREPLICA_REQUEST:
                         resp = new Message(Message.ADD_PREREPLICA, ID, 0, new String("7:8").getBytes());
                         CoreConfiguration.print("Add pre-replica [simulation]");
@@ -122,7 +114,6 @@ public class ServerReplyManager implements Runnable {
                         CoreConfiguration.print("Change pre-replica needed [simulation]");
                         proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
                         break;
-
                     case Message.CHG_REPLICA_REQUEST:
                         resp = new Message(Message.ADD_REPLICA, ID, 0, new String("2:2").getBytes());
                         CoreConfiguration.print("Add replica [simulation]");
@@ -138,11 +129,8 @@ public class ServerReplyManager implements Runnable {
                             one = true;
                             CoreConfiguration.print("End ack to=" + resp.getSrc());
                             resp = new Message(Message.END_ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), new byte[]{0});
-//                            if (primaryBackup) {
-//                                proxy.invokeAsynchronous(resp.serialize(serialized1), reply, new int[]{processes[0]});
-//                            } else {
-                                proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
-//                            }
+//                                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+//            F
                             CoreConfiguration.print("**FINISH**");
                             sessions.remove(resp.getSrc());
                         }
@@ -184,8 +172,7 @@ public class ServerReplyManager implements Runnable {
         @Override
         public void run() {
             if (numberofMessages == 0) {
-                i++;
-                if (i == 30) {
+                if (++i == 30) {
                     timer.cancel();
                 }
             }

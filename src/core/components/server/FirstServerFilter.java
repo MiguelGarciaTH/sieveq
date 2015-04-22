@@ -7,6 +7,7 @@ package core.components.server;
 import core.management.ServerSession;
 import core.message.Message;
 import core.management.CoreConfiguration;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,6 +35,7 @@ public class FirstServerFilter implements Runnable {
             Message resp = null;
             try {
                 resp = (Message) inQueue.take();
+//                System.out.println("SEQ=" + resp.getSeqNumber() + " data=" + Arrays.toString(resp.getData()));
                 session = sessions.get(resp.getSrc());
                 if (resp.getSeqNumber() >= session.getInSequenceNumberExpected()) {
                     outQueue.add(resp);

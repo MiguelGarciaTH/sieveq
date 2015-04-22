@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -19,8 +18,8 @@ public class RouteTable implements Serializable{
 
     private TreeMap<Integer, LinkedList<Integer>> route;
 
-    public RouteTable(TreeMap<Integer, LinkedList<Integer>> route) {
-        this.route = route;
+    public RouteTable() {
+        this.route = new TreeMap<Integer, LinkedList<Integer>>();
     }
 
     public void addRoute(Integer src, Integer dst) {

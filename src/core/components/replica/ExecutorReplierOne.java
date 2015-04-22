@@ -20,13 +20,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -37,14 +33,10 @@ public class ExecutorReplierOne implements Runnable, Replier {
     private ArrayBlockingQueue out;
     private ServerCommunicationSystem comm;
     private TreeMap<Integer, Integer> connected;
-    private int sharedID;
     private RouteTable route;
     private ServiceReplica replica;
     private ReplicaContext replicaContext;
 
-    private RemindTask task;
-    private int numberofMessages = 0;
-    private Timer timer;
     protected ByteBuffer deserialized = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
     protected ByteBuffer serialized1 = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
     protected boolean attackMode;
@@ -54,15 +46,14 @@ public class ExecutorReplierOne implements Runnable, Replier {
     public ExecutorReplierOne(ArrayBlockingQueue out, TreeMap<Integer, Integer> connected, int sharedID, RouteTable route, ServiceReplica replica, Malicious malicious) {
         this.out = out;
         this.connected = connected;
-        this.sharedID = sharedID;
         this.route = route;
         this.replica = replica;
         this.comm = replica.getReplicaContext().getServerCommunicationSystem();
         this.replica.setReplyController(this);
-    
-//        task = new RemindTask();
-//        timer = new Timer();
-//        timer.schedule(task, 0, 1000); //delay in milliseconds
+    }
+
+    public void setRoute(RouteTable route) {
+        this.route = route;
     }
 
     public void setAttackMode() {
@@ -82,7 +73,6 @@ public class ExecutorReplierOne implements Runnable, Replier {
                 TOMMessage request = (TOMMessage) out.take();
                 manageReply(request, null);
             } catch (InterruptedException ex) {
-//                ex.printStackTrace();
                 CoreConfiguration.printException(this.getClass().getCanonicalName(), "run", ex.getMessage());
             }
         }
@@ -94,24 +84,19 @@ public class ExecutorReplierOne implements Runnable, Replier {
         int[] dst;
         Message msg2;
         TOMMessage tomMsg2;
-
-//        numberofMessages++;
-//        if (ID==1) {
-//            
-//            System.out.println("*");
-////            rcv.setType(Message.DISCARD);
-////            System.out.println("Always discarding!! ");
-////            try {
-////                Thread.sleep(2000);
-////            } catch (InterruptedException ex) {
-////                Logger.getLogger(ExecutorReplierOne.class.getName()).log(Level.SEVERE, null, ex);
-////            }
-//        }
         switch (rcv.getType()) {
             case Message.SEND_REQUEST:
-                dst = route.getDestinationArray(rcv.getSrc());
-                request.reply.setConent(request.reply.getContent());
-                comm.send(dst, request.reply);
+//                System.out.println("No send:"+System.identityHashCode(this.route)+ " time=" +System.nanoTime());
+                try {
+                    dst = route.getDestinationArray(rcv.getSrc());
+                    request.reply.setContent(request.reply.getContent());
+//                    System.out.println("VOU ENVIAR DEST=" + Arrays.toString(dst));
+                    comm.send(dst, request.reply);
+                    
+                } catch (Exception e) {
+                    System.out.println("ex:::::" + route.getDestination(100));
+                }
+
                 break;
             case Message.ACK:
                 dst = route.getDestinationArray(rcv.getSrc());
@@ -210,28 +195,6 @@ public class ExecutorReplierOne implements Runnable, Replier {
     @Override
     public void setReplicaContext(ReplicaContext rc) {
         this.replicaContext = replicaContext;
-    }
-
-    class RemindTask extends TimerTask {
-
-        int i = 0;
-
-        RemindTask() {
-        }
-
-        @Override
-        public void run() {
-//            if (i < 3) {
-//                if (numberofMessages == 0) {
-//                    i++;
-//                }
-            System.out.println("Messages delivered=" + numberofMessages);
-            numberofMessages = 0;
-//            } else {
-//                timer.cancel();
-//            }
-        }
-
     }
 
 }

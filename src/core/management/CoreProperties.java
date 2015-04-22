@@ -57,7 +57,7 @@ public class CoreProperties {
     public static int malicious_id;
     static public int attack_threads;
     static public int size_message;
-    static public String target_ip;
+    static public String target_ip, experiment_type;
     static public int target_port;
     static public int rate_message;
 
@@ -80,6 +80,7 @@ public class CoreProperties {
                     debug = Boolean.parseBoolean(prop.getProperty("core.debug"));
                     num_replicas = Integer.parseInt(prop.getProperty("core.replicas"));
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
+                    experiment_type= prop.getProperty("core.experiments.type");
 
                     quorom = Integer.parseInt(prop.getProperty("core.replicas.quorom"));
                     warmup_rounds = Integer.parseInt(prop.getProperty("core.warmup"));
@@ -166,6 +167,7 @@ public class CoreProperties {
                     channel = false;
                     timeout = Long.parseLong(prop.getProperty("core.batch.timeout"));
                     batch_size = Integer.parseInt(prop.getProperty("core.batch.size"));
+                    experiment_type= prop.getProperty("core.experiments.type");
                     ACK_RATE = Integer.parseInt(prop.getProperty("core.ackrate"));
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
                     max_queue = Integer.parseInt(prop.getProperty("core.rounds")) * Integer.parseInt(prop.getProperty("core.experiments.messageRate"));

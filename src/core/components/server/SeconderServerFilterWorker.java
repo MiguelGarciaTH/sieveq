@@ -12,6 +12,7 @@ import core.management.ServerSession;
 import core.message.Message;
 import core.management.CoreConfiguration;
 import core.modules.voter.Voter;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,7 +42,6 @@ public class SeconderServerFilterWorker implements Runnable {
                 Message resp = (Message) in.take();
                 
                 boolean quorom = voter.vote(resp.getType(), resp.getSrc(), sessions, resp.getSeqNumber(), resp.getData());
-//                System.out.println("SEQ="+resp.getSeqNumber() + " data="+Arrays.toString(resp.getData()));
                 if (quorom) {
                     out.add(resp);
                 }

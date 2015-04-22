@@ -22,7 +22,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -38,21 +37,23 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
     protected TreeMap<Integer, Integer> connected;
     protected int sharedID = 0;
 //    protected ReplicaContext replicaContext;
+//    protected MessageContext msgCtx;
     protected CryptoScheme crypto;
     protected Malicious malicious;
-    // protected MessageContext msgCtx;
+
     private int state = 0;
 
     private WorkerPool workers;
     private Executor exec;
     protected ArrayBlockingQueue out, inCrypto, outCrypto;
-    protected TreeMap<Integer, LinkedList<Integer>> route_struct;
 
     public ReplicaExecutor(int id) {
         this.ID = id;
         this.replica = new ServiceReplica(id, this, this, true);
-        this.route_struct = new TreeMap<Integer, LinkedList<Integer>>();
-        this.route = new RouteTable(route_struct);
+        this.route = new RouteTable();
+//        if (id == 1) {
+//            this.route.addRoute(100, 101);
+//        }
         this.connected = new TreeMap<Integer, Integer>();
         this.crypto = CryptoSchemeFactory.getCryptoScheme(null);
         this.malicious = MaliciousFactory.getMaliciousModule();
@@ -77,14 +78,15 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
 
     @Override
     public void installSnapshot(byte[] state) {
-        System.out.println("Recovering state");
+        System.out.println("Recovering state=" + this.state);
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(state);
             ObjectInput in = new ObjectInputStream(bis);
             this.state = (int) in.readInt();
             this.route = (RouteTable) in.readObject();
+            setRoute(this.route);
+//            System.out.println("No installSnapshot:" + System.identityHashCode(this.route) + " time=" + System.nanoTime());
             this.connected = (TreeMap<Integer, Integer>) in.readObject();
-            this.route_struct = (TreeMap<Integer, LinkedList<Integer>>) in.readObject();
             in.close();
             bis.close();
         } catch (Exception ex) {
@@ -101,11 +103,9 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             ObjectOutput out = new ObjectOutputStream(bos);
             out.writeInt(this.state);
             out.flush();
-            out.writeObject(route);
+            out.writeObject(this.route);
             out.flush();
-            out.writeObject(connected);
-            out.flush();
-            out.writeObject(this.route_struct);
+            out.writeObject(this.connected);
             out.flush();
             bos.flush();
             out.close();
@@ -120,12 +120,12 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
 
     private void printState() {
         if (route != null) {
-            System.out.println("State:");
-            System.out.println("<<");
+            System.out.println("State <<");
             this.route.prettyPrint();
-            System.out.println("connected size=" + this.connected.size());
-
+            System.out.print("connected=" + this.connected.size());
             System.out.println(">>");
         }
     }
+    
+        public abstract void setRoute(RouteTable tablle);
 }
