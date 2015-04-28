@@ -71,7 +71,7 @@ public class PreReplicaExecutorThree implements ReplyListener, Runnable {
         new Thread(snd).start();
         try {
             processes = proxy.getViewManager().getCurrentViewProcesses();
-            System.out.println("Processes="+Arrays.toString(processes));
+//            System.out.println("Processes="+Arrays.toString(processes));
             while (true) {
                 ByteArrayWrap dataWrap;
                 try {

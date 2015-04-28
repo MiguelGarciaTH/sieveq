@@ -11,7 +11,6 @@ import core.management.ServerSession;
 import core.message.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
-import core.massif.OGEvemtGenerator;
 import core.modules.experiments.Experiment;
 import core.modules.malicious.Malicious;
 import core.modules.voter.SimpleVoter;
@@ -38,8 +37,6 @@ public abstract class ClientExecutor implements Runnable {
     protected ConcurrentHashMap<Integer, ServerSession> sessions;
     protected int destination;
     protected CoreProperties prop;
-//    protected ThroughputExperiments throughput;
-//    protected LatencyExperiments latency;
     protected Experiment experiment;
     protected Long[] sent;
     protected long initTime, finishTime;
@@ -56,7 +53,7 @@ public abstract class ClientExecutor implements Runnable {
     protected int[] senSeq;
     int msg_len;
 
-    private OGEvemtGenerator generator;
+//    private OGEvemtGenerator generator;
 
     ClientExecutor(int ID, int dst) {
         this.ID = ID;
@@ -85,12 +82,10 @@ public abstract class ClientExecutor implements Runnable {
         this.pool = new WorkerPool(in, out, threadQueue, "crypto", CoreProperties.num_workers);
         this.sent = new Long[total + 5];
         this.senSeq = new int[sent.length];
-//        this.throughput = new ThroughputExperiments(false, null, prop.throughput_experiments_file);
-//        this.latency = new LatencyExperiments(senSeq, true, sent, null, inQueue, prop.latency_experiments_file);
         this.experiment = new Experiment(CoreProperties.experiment_type, senSeq, sent, inQueue);
-        this.generator = new OGEvemtGenerator();
-        this.generator.loadEventFile("./config/maxi-test-log.log");
-        this.generator.getStatistics();
+//        this.generator = new OGEvemtGenerator();
+//        this.generator.loadEventFile("./config/maxi-test-log.log");
+//        this.generator.getStatistics();
     }
 
     abstract void send(byte[] cmd);
@@ -135,7 +130,7 @@ public abstract class ClientExecutor implements Runnable {
             }
             send(Message.END_REQUEST, seq++, cmd);
             System.out.println("\t\t******Client Executor Finished*******");
-            generator.getStatistics();
+//            generator.getStatistics();
         } catch (Exception ex) {
             Logger.getLogger(ClientExecutor.class.getName()).log(Level.SEVERE, null, ex);
         }

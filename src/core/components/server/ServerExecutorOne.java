@@ -49,6 +49,7 @@ public class ServerExecutorOne extends ServerExecutor {
 
         this.crypto = CryptoSchemeFactory.getCryptoScheme(null);
         this.cmd = new byte[1]; //resolver depois
+            new Random().nextBytes(cmd);
     }
 
     @Override
@@ -56,8 +57,6 @@ public class ServerExecutorOne extends ServerExecutor {
         first.start();
         second.start();
         third.start();
-
-        new Random().nextBytes(cmd);
         this.processes = proxy.getViewManager().getCurrentViewProcesses();
         send(Message.HELLO, sessions.get(ID).incrementeOutSequenceNumber(), cmd);
         CoreConfiguration.print("Hello sent waiting confirmation");
@@ -76,7 +75,6 @@ public class ServerExecutorOne extends ServerExecutor {
         byte[] data = reply.getContent();
         try {
             Message resp = validate(data);
-//            System.out.println("Receiving message="+resp.getSeqNumber() + ": src="+resp.getSrc());
             firstQueue.put(resp);
         } catch (InterruptedException ex) {
             firstQueue.clear();

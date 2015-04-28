@@ -86,17 +86,9 @@ public class ExecutorReplierOne implements Runnable, Replier {
         TOMMessage tomMsg2;
         switch (rcv.getType()) {
             case Message.SEND_REQUEST:
-//                System.out.println("No send:"+System.identityHashCode(this.route)+ " time=" +System.nanoTime());
-                try {
-                    dst = route.getDestinationArray(rcv.getSrc());
-                    request.reply.setContent(request.reply.getContent());
-//                    System.out.println("VOU ENVIAR DEST=" + Arrays.toString(dst));
-                    comm.send(dst, request.reply);
-                    
-                } catch (Exception e) {
-                    System.out.println("ex:::::" + route.getDestination(100));
-                }
-
+                dst = route.getDestinationArray(rcv.getSrc());
+                request.reply.setContent(request.reply.getContent());
+                comm.send(dst, request.reply);
                 break;
             case Message.ACK:
                 dst = route.getDestinationArray(rcv.getSrc());

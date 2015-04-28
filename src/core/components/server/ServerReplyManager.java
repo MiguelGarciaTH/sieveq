@@ -12,8 +12,6 @@ import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.misc.Lock;
 import core.modules.experiments.Experiment;
-import core.modules.experiments.LatencyExperiments;
-import core.modules.experiments.ThroughputExperiments;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -32,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServerReplyManager implements Runnable {
 
     private RemindTask task;
-
     private Timer timer;
     private BlockingQueue inQueue;
     private ConcurrentHashMap<Integer, ServerSession> sessions;
@@ -40,19 +37,14 @@ public class ServerReplyManager implements Runnable {
     private Lock lock;
     private int ID;
     private ReplyListener reply;
-    private boolean primaryBackup;
     private ArrayBlockingQueue experimentQueue;
-
-    private boolean warmup = true;
     private Experiment experiment;
-
     private int numberofMessages = 0;
     protected ByteBuffer serialized1 = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
     private int total = CoreProperties.messageRate * CoreProperties.experiment_rounds + CoreProperties.messageRate * CoreProperties.warmup_rounds;
 
     public ServerReplyManager(ServerExecutor aThis, int ID, BlockingQueue thirdQueue, ConcurrentHashMap<Integer, ServerSession> sessions, ServiceProxy proxy, Lock lock, boolean primaryBackup) {
         this.ID = ID;
-        this.primaryBackup = primaryBackup;
         this.inQueue = thirdQueue;
         this.sessions = sessions;
         this.lock = lock;
@@ -65,7 +57,6 @@ public class ServerReplyManager implements Runnable {
     }
 
     @Override
-
     public void run() {
         int[] processes = proxy.getViewManager().getCurrentViewProcesses();
         Message resp;
@@ -88,15 +79,14 @@ public class ServerReplyManager implements Runnable {
                             CoreConfiguration.print("Server unlock");
                         }
                         break;
-                    case Message.WARMUP_END:
-                        System.out.println("WARMUP END!");
+//                    case Message.WARMUP_END:
+//                        System.out.println("WARMUP END!");
 //                        experimentQueue.add(resp);
 //                        warmup = false;
 //                        inQueue.clear();
 //                        resp = new Message(Message.WARMUP_END_ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), new byte[]{0});
 //                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
-
-                        break;
+//                        break;
                     case Message.SEND_REQUEST:
                         experimentQueue.add(resp);
                         numberofMessages++;
@@ -129,8 +119,8 @@ public class ServerReplyManager implements Runnable {
                             one = true;
                             CoreConfiguration.print("End ack to=" + resp.getSrc());
                             resp = new Message(Message.END_ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), new byte[]{0});
-//                                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
-//            F
+//                            proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+//
                             CoreConfiguration.print("**FINISH**");
                             sessions.remove(resp.getSrc());
                         }
@@ -172,7 +162,7 @@ public class ServerReplyManager implements Runnable {
         @Override
         public void run() {
             if (numberofMessages == 0) {
-                if (++i == 30) {
+                if (++i == 100) {
                     timer.cancel();
                 }
             }

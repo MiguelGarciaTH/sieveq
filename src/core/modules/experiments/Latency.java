@@ -36,8 +36,6 @@ public class Latency implements Runnable {
     private int[] sentSeq;
     private BlockingQueue rcvQueue;
     private float avg;
-    private boolean start = false;
-    // private int counter = 0;
     private int ack_failure = 0, negative = 0;
     private int x, y;
     private LinkedBlockingQueue in;
@@ -51,19 +49,15 @@ public class Latency implements Runnable {
             this.client = target;
             this.in = in;
             if (target) {
-                System.out.println("new latency client");
                 this.sntTime = sentTime;
                 this.rcvTime = new Long[sentTime.length];
                 this.sentSeq = sentSeq;
                 this.rcvSeq = new int[sentTime.length];
                 this.outputFileStream = new FileWriter(results);
                 this.socket = new DatagramSocket(CoreProperties.latency_experiments_port);
-                System.out.println("Client listen on port=" + CoreProperties.latency_experiments_port);
             } else {
-                System.out.println("new latency server");
                 this.rcvQueue = queue;
                 this.socket = new DatagramSocket();
-                System.out.println("Server sending to " + CoreProperties.experiments_ip + ":" + CoreProperties.latency_experiments_port);
                 IPAddress = InetAddress.getByName(CoreProperties.experiments_ip);
             }
         } catch (IOException ex) {
@@ -89,39 +83,25 @@ public class Latency implements Runnable {
                     if (seq[2].contains("ACK")) {
                         long t = System.nanoTime();
                         Integer i = Integer.valueOf(seq[0]);
-//                        System.out.println("Ack received=" + i);
-                        //Integer type = Integer.valueOf(seq[1]);
-//                        if (type == Message.WARMUP_END) {
-//                            x = i + 1;
-//                            System.out.println("Index X=" + x);
-//                            warmup = true;
-//                        }
-//                        if (warmup) {
                         rcvTime[i] = t;
                         rcvSeq[i] = i;
                         elapsed_secs.add((System.nanoTime() - start_time) / 1000000000.0);
-                        //  counter++;
-//                        }
                     }
                     if (seq[2].contains("END")) {
-                        System.out.println("End request received");
                         socket.close();
                         break;
                     }
                     if (r == total) {
-                        System.out.println("SAIU SOZINHO");
                         socket.close();
                         break;
                     }
                 }
                 writeFile();
-                //server
             } else {
+                //server
                 while (true) {
                     Message m = (Message) rcvQueue.take();
-//                    if (start) {
                     if (m.getType() == Message.SEND_REQUEST) {
-                        //  counter++;
                         String s = m.getSeqNumber() + ":" + m.getType() + ":ACK";
                         sendPacket = new DatagramPacket(s.getBytes(), s.length(), IPAddress, CoreProperties.latency_experiments_port);
                         socket.send(sendPacket);
@@ -130,16 +110,9 @@ public class Latency implements Runnable {
                         String s = m.getSeqNumber() + ":" + m.getType() + ":END";
                         sendPacket = new DatagramPacket(s.getBytes(), s.length(), IPAddress, CoreProperties.latency_experiments_port);
                         socket.send(sendPacket);
-                        System.out.println("Latency experiment: END REQUEST SENT");
+//                        System.out.println("Latency experiment: END REQUEST SENT");
                         break;
                     }
-//                    }
-//                    if (m.getType() == Message.WARMUP_END) {
-//                        start = true;
-//                        String s = m.getSeqNumber() + ":" + m.getType() + ":ACK";
-//                        sendPacket = new DatagramPacket(s.getBytes(), s.length(), IPAddress, CoreProperties.latency_experiments_port);
-//                        socket.send(sendPacket);
-//                    }
                 }
             }
         } catch (Exception ex) {
@@ -149,10 +122,9 @@ public class Latency implements Runnable {
     }
 
     private void writeFile() {
-        System.out.println("Writing latency file");
+        System.out.println("[Experiments] writing file results");
         long write_start_time = System.nanoTime();
         try {
-
             int compared = 0;
             BufferedWriter out = new BufferedWriter(outputFileStream);
             out.write(" - latency(msecs)\n");
@@ -162,9 +134,9 @@ public class Latency implements Runnable {
             //y = getIndex() - 1;
             x = CoreProperties.warmup_rounds * CoreProperties.messageRate;
             y = x;
-            int subSize = elapsed_secs.size() - CoreProperties.warmup_rounds * CoreProperties.messageRate;
-            System.out.println("total=" + subSize + " rcvTime X=" + x + " sntTime Y=" + y + " to analyze=" + Math.min(x, y));
-            for (int k = 0; k < subSize; k++) {
+            int subSize = elapsed_secs.size();// - CoreProperties.warmup_rounds * CoreProperties.messageRate;
+//            System.out.println("total=" + subSize + " rcvTime X=" + x + " sntTime Y=" + y + " to analyze=" + Math.min(x, y));
+            for (int k = x; k < subSize; k++) {
                 if (rcvTime[x] == null || sntTime[y] == null) {
                     elapsed = avg / (it + 1);
                     ack_failure++;
@@ -178,7 +150,6 @@ public class Latency implements Runnable {
                 avg += elapsed;
                 compared++;
                 if (it < subSize) {
-//                    System.out.println("Writing=" + elapsed + " || " + sentSeq[y] + "==" + rcvSeq[x]);
                     out.write(elapsed_secs.get(it) + " " + elapsed + " " + sentSeq[y] + "==" + rcvSeq[x] + "\n");
                     out.flush();
                     it++;
@@ -189,9 +160,9 @@ public class Latency implements Runnable {
             }
             out.close();
             outputFileStream.close();
-            CoreConfiguration.print("\nAvg latency=" + avg / (it + 1) + " msecs  nulls=" + ack_failure + " negatives=" + negative + " compared=" + compared);
+            CoreConfiguration.print("nulls=" + ack_failure + " negatives=" + negative + " compared=" + compared);
             double minutes = ((System.nanoTime() - write_start_time) / 1000000000.0) / 60;
-            CoreConfiguration.print("Latency write finished elasped time=" + minutes + " minutes");
+            CoreConfiguration.print("[Experiments] write finished" + minutes + " minutes");
         } catch (IOException ex) {
             ex.printStackTrace();
             CoreConfiguration.printException(this.getClass().getCanonicalName(), "writeFile2", ex.getMessage());

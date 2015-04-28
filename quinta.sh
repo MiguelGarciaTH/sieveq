@@ -1,15 +1,21 @@
 #!/bin/bash
-#QUINTA="s6 s9 s10 s11 s12 s13 s7 s8"
-QUINTA="r1 s1"
-#TOKILL="s6 s9 s10 s11 s12 s13 s7 s8"
-SERVER="s1" 
-#SERVER="s9"
-CLIENT="r1"
-#CLIENT="s6"
 
-#CONTROLLER="s7"
-PREREPLICA="s1" 
-#PREREPLICA="s7 s8"
+
+LOCAL=0
+if [ $LOCAL = 1 ]; then
+	QUINTA="r1 s1"
+	TOKILL=$QUINTA
+	SERVER="s1" 
+	PREREPLICA="s1" 
+	CLIENT="r1"
+else 
+	QUINTA="s6 s9 s10 s11 s12 s13 s7 s8"
+	TOKILL=$QUINTA
+	SERVER="s9"
+	CLIENT="s6"
+	CONTROLLER="s7"
+	PREREPLICA="s7 s8"
+fi
 
 #ATTACKER="s17"
 IMGS="/media/miguel/MIGUEL/Papers/Author/Journals/2015-core-mis/IEEE_2/imgs/gnuplot/plots/"
@@ -30,6 +36,15 @@ elif [ "$1" = "config" ]; then
 		echo $i ": scp Core-MIS complete"
 	done
 
+elif [ "$1" = "rename" ]; then
+	for i in $QUINTA
+	do
+		echo $i ": renaming node to mhenriques "
+		ssh mhenriques@quinta.navigators.di.fc.ul.pt quinta update -u mhenriques $i
+		echo $i ":  renaming node complete "
+	done
+
+
 elif [ "$1" = "setup" ]; then
 	for i in $QUINTA
 	do	
@@ -45,13 +60,12 @@ elif [ "$1" = "clear" ]; then
 	do
 		echo $i ": clear Core-MIS"
 		ssh $i.quinta -C "killall java"
-		ssh $i.quinta rm /root/Core-MIS/
+		ssh $i.quinta rm -R /root/Core-MIS/*
 	done
 
 else
 	for i in $QUINTA 
 	do
-		ssh $i.quinta rm /root/Core-MIS/config/currentView
 		rsync -aL -d --delete * $i.quinta:/root/Core-MIS
 		echo $i ": Core-MIS sync completed .."
 	done

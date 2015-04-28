@@ -15,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
@@ -29,7 +30,7 @@ public class Throughput implements Runnable {
     private long globalTimeInit, globalTimeFinit;
     private ArrayList<Integer> messagesPerSec;
     private RemindTaskTwo taskTwo;
-    private int numberofMessages=0, sum = 0;
+    private int numberofMessages = 0, sum = 0;
     private Timer timer2;
     private Message message;
     private boolean target;
@@ -100,47 +101,58 @@ public class Throughput implements Runnable {
     }
 
     private void writeFile() {
+        System.out.println("[Experiments] writing file results");
         try {
             BufferedWriter out = new BufferedWriter(outputFileStream);
             int i = 0;
             out.write(" - msg/sec \n");
-            for (Integer t : messagesPerSec) {
+      
+            List<Integer> sublist = messagesPerSec.subList(CoreProperties.warmup_rounds+1, messagesPerSec.size());
+            System.out.println("init="+CoreProperties.warmup_rounds);
+            System.out.println("end="+sublist.size() +" before="+messagesPerSec.size());
+            for (Integer t : sublist) {
                 try {
                     out.write(i++ + " " + t + "\n");
-                    sum += t;
                     out.flush();
+                    percentagePrint(t, sum);
                 } catch (IOException ex) {
                     CoreConfiguration.printException(this.getClass().getCanonicalName(), "writeFile", ex.getMessage());
                 }
             }
             out.close();
             outputFileStream.close();
-            System.out.println("");
             double elapsedTime = ((double) (globalTimeFinit - globalTimeInit) / 1000000000.0);
-            CoreConfiguration.print("[Exp]Throughput write finished");
-//            CoreConfiguration.print("[Exp]Total msg (sum)=" + sum);
+            CoreConfiguration.print("[Experiments] write finished");
             CoreConfiguration.print("[Exp]Elapsed time=" + elapsedTime + " secs");
-//            CoreConfiguration.print("[Exp]Sum/elapsed =" + sum / elapsedTime);
-
         } catch (IOException ex) {
             CoreConfiguration.printException(this.getClass().getCanonicalName(), "writeFile2", ex.getMessage());
+        }
+    }
+    double history_percentage = 0;
+
+    private void percentagePrint(int rounds, int total_file) {
+        int remaining = total_file - rounds;
+        double percent = 100 - ((remaining * 100) / total_file);
+        if (percent % 10 == 0 && percent > history_percentage) {
+            history_percentage = percent;
+            System.out.print(percent + "%\t");
         }
     }
 
     class RemindTaskTwo extends TimerTask {
 
-        int i = 0;
 
         RemindTaskTwo() {
         }
 
         @Override
         public void run() {
-            
+
             synchronized (this) {
-//                System.out.println("experiment: #messages=" + numberofMessages + " second=" + i++);
                 messagesPerSec.add(numberofMessages);
+                sum += numberofMessages;
                 numberofMessages = 0;
+
             }
         }
     }

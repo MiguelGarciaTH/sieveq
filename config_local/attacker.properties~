@@ -1,7 +1,0 @@
-
-core.attacker.target.ip=127.0.0.1
-core.attacker.target.port=6501
-
-core.crypto.scheme=none
-core.attacker.payload=100
- 

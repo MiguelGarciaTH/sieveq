@@ -170,6 +170,7 @@ public class CoreProperties {
                     experiment_type= prop.getProperty("core.experiments.type");
                     ACK_RATE = Integer.parseInt(prop.getProperty("core.ackrate"));
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
+                    warmup_rounds = Integer.parseInt(prop.getProperty("core.warmup"));
                     max_queue = Integer.parseInt(prop.getProperty("core.rounds")) * Integer.parseInt(prop.getProperty("core.experiments.messageRate"));
                     debug = Boolean.parseBoolean(prop.getProperty("core.debug"));
                     queue_size = Integer.parseInt(prop.getProperty("core.queue_size"));

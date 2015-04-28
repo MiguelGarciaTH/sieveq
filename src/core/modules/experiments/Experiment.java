@@ -39,11 +39,13 @@ public class Experiment implements Runnable {
 
     @Override
     public void run() {
-        if (type.endsWith("client")) {
+        if (type.equals("client")) {
             latency.run();
         } else {
             throughput.run();
         }
+        
+        
     }
 
 }

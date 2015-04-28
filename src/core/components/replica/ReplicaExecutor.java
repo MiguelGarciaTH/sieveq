@@ -36,13 +36,9 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
     protected RouteTable route;
     protected TreeMap<Integer, Integer> connected;
     protected int sharedID = 0;
-//    protected ReplicaContext replicaContext;
-//    protected MessageContext msgCtx;
     protected CryptoScheme crypto;
     protected Malicious malicious;
-
     private int state = 0;
-
     private WorkerPool workers;
     private Executor exec;
     protected ArrayBlockingQueue out, inCrypto, outCrypto;
@@ -51,9 +47,6 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
         this.ID = id;
         this.replica = new ServiceReplica(id, this, this, true);
         this.route = new RouteTable();
-//        if (id == 1) {
-//            this.route.addRoute(100, 101);
-//        }
         this.connected = new TreeMap<Integer, Integer>();
         this.crypto = CryptoSchemeFactory.getCryptoScheme(null);
         this.malicious = MaliciousFactory.getMaliciousModule();
@@ -78,15 +71,14 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
 
     @Override
     public void installSnapshot(byte[] state) {
-        System.out.println("Recovering state=" + this.state);
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(state);
             ObjectInput in = new ObjectInputStream(bis);
             this.state = (int) in.readInt();
             this.route = (RouteTable) in.readObject();
             setRoute(this.route);
-//            System.out.println("No installSnapshot:" + System.identityHashCode(this.route) + " time=" + System.nanoTime());
             this.connected = (TreeMap<Integer, Integer>) in.readObject();
+            System.out.println("Recovering state=" + this.state);
             in.close();
             bis.close();
         } catch (Exception ex) {
@@ -126,6 +118,6 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
             System.out.println(">>");
         }
     }
-    
-        public abstract void setRoute(RouteTable tablle);
+
+    public abstract void setRoute(RouteTable tablle);
 }

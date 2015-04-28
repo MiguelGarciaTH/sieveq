@@ -17,7 +17,7 @@ public class ThreadBlockQueue extends LinkedBlockingQueue<byte[]> {
 
     public ThreadBlockQueue(int nrBlocks, int blockSize) {
         super();
-        System.out.println("Block size=>"+blockSize);
+//        System.out.println("Block size=>"+blockSize);
         setup(nrBlocks, blockSize);
 
     }
