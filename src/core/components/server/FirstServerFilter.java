@@ -43,6 +43,9 @@ public class FirstServerFilter implements Runnable {
                 if (resp.getType() == Message.CHG_PREREPLICA_REQUEST) {
                     outQueue.put(resp);
                 }
+                   if (resp.getType() == Message.COUNTER) {
+                    outQueue.put(resp);
+                }
             } catch (NullPointerException ex) {
                 if (resp.getSrc() == ID) {
                     sessions.put(ID, new ServerSession(0, 0, new int[]{0, 0, 0, 0}, ID, true));

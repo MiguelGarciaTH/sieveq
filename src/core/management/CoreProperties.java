@@ -52,6 +52,7 @@ public class CoreProperties {
     static public int batch_size;
 
     static public int payload;
+    static public int targetID;
     static public long timeout;
     public static int ACK_RATE;
     public static int malicious_id;
@@ -75,12 +76,14 @@ public class CoreProperties {
                     ip = prop.getProperty("core.attacker.target.ip");
                     crypto_scheme = prop.getProperty("core.crypto.scheme");
                     payload = Integer.parseInt(prop.getProperty("core.attacker.payload"));
+                    targetID = Integer.parseInt(prop.getProperty("core.attacker.targetID"));
+
                     break;
                 case "client":
                     debug = Boolean.parseBoolean(prop.getProperty("core.debug"));
                     num_replicas = Integer.parseInt(prop.getProperty("core.replicas"));
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
-                    experiment_type= prop.getProperty("core.experiments.type");
+                    experiment_type = prop.getProperty("core.experiments.type");
 
                     quorom = Integer.parseInt(prop.getProperty("core.replicas.quorom"));
                     warmup_rounds = Integer.parseInt(prop.getProperty("core.warmup"));
@@ -115,13 +118,14 @@ public class CoreProperties {
                     break;
                 case "replica":
                     channel = false;
-                    attack_threads= Integer.parseInt(prop.getProperty("core.attacker.threads"));
-                    rate_message=Integer.parseInt(prop.getProperty("core.attacker.rate"));
-                    size_message =Integer.parseInt(prop.getProperty("core.attacker.size"));
+                    attack_threads = Integer.parseInt(prop.getProperty("core.attacker.threads"));
+                    rate_message = Integer.parseInt(prop.getProperty("core.attacker.rate"));
+                    size_message = Integer.parseInt(prop.getProperty("core.attacker.size"));
                     target_ip = prop.getProperty("core.attacker.target.ip");
-                    target_port =Integer.parseInt(prop.getProperty("core.attacker.target.port"));
-                    
-                    
+                    target_port = Integer.parseInt(prop.getProperty("core.attacker.target.port"));
+                    payload = Integer.parseInt(prop.getProperty("core.attacker.payload"));
+                    targetID = Integer.parseInt(prop.getProperty("core.attacker.targetID"));
+
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
                     debug = Boolean.parseBoolean(prop.getProperty("core.debug"));
                     queue_size = Integer.parseInt(prop.getProperty("core.queue_size"));
@@ -167,7 +171,7 @@ public class CoreProperties {
                     channel = false;
                     timeout = Long.parseLong(prop.getProperty("core.batch.timeout"));
                     batch_size = Integer.parseInt(prop.getProperty("core.batch.size"));
-                    experiment_type= prop.getProperty("core.experiments.type");
+                    experiment_type = prop.getProperty("core.experiments.type");
                     ACK_RATE = Integer.parseInt(prop.getProperty("core.ackrate"));
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
                     warmup_rounds = Integer.parseInt(prop.getProperty("core.warmup"));

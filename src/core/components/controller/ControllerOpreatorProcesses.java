@@ -38,10 +38,10 @@ public class ControllerOpreatorProcesses extends ControllerOperator {
     }
 
     @Override
-    void createReplica(int id) {
+   public void createReplica(int id) {
         CoreConfiguration.print("create replica=" + id);
         // String cmd = "echo 1";
-        String cmd = "scripts/add-replica.sh " + id + " ";
+        String cmd = "scripts/add-replica.sh " + id + "";
         try {
             Runtime.getRuntime().exec(cmd);
         } catch (IOException ex) {
@@ -50,7 +50,7 @@ public class ControllerOpreatorProcesses extends ControllerOperator {
     }
 
     @Override
-    void destroyReplica(int id) {
+    public void destroyReplica(int id) {
         String cmd = "scripts/kill-replica.sh " + id + " ";
         try {
             Runtime.getRuntime().exec(cmd);

@@ -40,7 +40,7 @@ public abstract class ClientExecutor implements Runnable {
     protected Experiment experiment;
     protected Long[] sent;
     protected long initTime, finishTime;
-    private int total;
+    private final int total;
     private double history_percentage = 0;
     protected Malicious malicious;
     protected WorkerPool pool;
@@ -102,7 +102,6 @@ public abstract class ClientExecutor implements Runnable {
     @Override
     public void run() {
         try {
-
             int payloadSize = prop.message_size > msg_len ? (prop.message_size - msg_len) : prop.message_size;
             byte[] cmd = new byte[payloadSize];
             ByteBuffer dst = ByteBuffer.allocate(4);

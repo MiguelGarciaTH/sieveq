@@ -18,7 +18,7 @@ public class Experiment implements Runnable {
 
     private Latency latency;
     private Throughput throughput;
-    private String type;
+    private final String type;
 
     public Experiment(String type, int[] senSeq, Long[] sent, BlockingQueue inQueue) {
         this.type = type;

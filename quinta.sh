@@ -1,5 +1,6 @@
 #!/bin/bash
 
+APP="SieveQ"
 
 LOCAL=0
 if [ $LOCAL = 1 ]; then
@@ -31,9 +32,9 @@ elif [ "$1" = "server" ]; then
 elif [ "$1" = "config" ]; then
 	for i in $QUINTA
 	do
-		echo $i ": cp configurations"
+		echo $i ": cp $APP configurations"
 		scp -r config/* $i.quinta:~/Core-MIS/config/
-		echo $i ": scp Core-MIS complete"
+		echo $i ": scp $APP complete"
 	done
 
 elif [ "$1" = "rename" ]; then
@@ -58,7 +59,7 @@ elif [ "$1" = "setup" ]; then
 elif [ "$1" = "clear" ]; then
 	for i in $TOKILL
 	do
-		echo $i ": clear Core-MIS"
+		echo $i ": clear $APP"
 		ssh $i.quinta -C "killall java"
 		ssh $i.quinta rm -R /root/Core-MIS/*
 	done
@@ -67,7 +68,7 @@ else
 	for i in $QUINTA 
 	do
 		rsync -aL -d --delete * $i.quinta:/root/Core-MIS
-		echo $i ": Core-MIS sync completed .."
+		echo $i ": $APP sync completed .."
 	done
 fi
 

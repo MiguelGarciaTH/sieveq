@@ -5,11 +5,14 @@
  */
 package core.components.replica;
 
+import bftsmart.communication.MessageHandler;
 import bftsmart.communication.ServerCommunicationSystem;
+import bftsmart.reconfiguration.ServerViewManager;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ReplicaContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.core.messages.TOMMessage;
+import bftsmart.tom.core.messages.TOMMessageType;
 import bftsmart.tom.server.Replier;
 import core.management.RouteTable;
 import core.message.Message;
@@ -21,6 +24,7 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -32,6 +36,7 @@ public class ExecutorReplierOne implements Runnable, Replier {
 
     private ArrayBlockingQueue out;
     private ServerCommunicationSystem comm;
+    private MessageHandler handler;
     private TreeMap<Integer, Integer> connected;
     private RouteTable route;
     private ServiceReplica replica;
@@ -43,27 +48,25 @@ public class ExecutorReplierOne implements Runnable, Replier {
     protected Malicious malicious;
     private int attackedCounter;
 
+    private Timer t;
+    private Counter task;
+    private ServerViewManager svm;
+
     public ExecutorReplierOne(ArrayBlockingQueue out, TreeMap<Integer, Integer> connected, int sharedID, RouteTable route, ServiceReplica replica, Malicious malicious) {
         this.out = out;
         this.connected = connected;
         this.route = route;
         this.replica = replica;
         this.comm = replica.getReplicaContext().getServerCommunicationSystem();
+        this.handler = comm.getMessageHander();
         this.replica.setReplyController(this);
+        this.svm = replica.getSVManager();
+        this.task = new Counter();
+        this.t = new Timer();
     }
 
     public void setRoute(RouteTable route) {
         this.route = route;
-    }
-
-    public void setAttackMode() {
-        System.out.println("EM MODO ATAQUE");
-//        attackMode = true;
-//        try {
-//            Thread.sleep(2000);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(ExecutorReplierOne.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     @Override
@@ -108,6 +111,7 @@ public class ExecutorReplierOne implements Runnable, Replier {
                     Message msg = new Message(Message.CONNECT, rcv.getSrc(), rcv.getSeqNumber(), intTobytes(dst2));
                     TOMMessage tomMsg = new TOMMessage(CoreConfiguration.ID, request.getSession(), request.getSequence(), msg.serialize(serialized1), request.getViewID(), request.getReqType());
                     comm.send(dst2, tomMsg);
+                    this.t.schedule(task, 0, 5000);
                     CoreConfiguration.print("Sending connected list to=" + Arrays.toString(dst2));
                 }
                 break;
@@ -136,6 +140,13 @@ public class ExecutorReplierOne implements Runnable, Replier {
                 CoreConfiguration.print(" CHG_PREREPLICA > DST=> " + Arrays.toString(dst));
                 comm.send(dst, request.reply);
                 break;
+            case Message.ADD_REPLICA:
+                CoreConfiguration.print("Changing ... replicas modify state here later!");
+                dst = route.getDestinationArray(rcv.getSrc());
+                CoreConfiguration.print(" CHG_REPLICA > DST=> " + Arrays.toString(dst));
+                comm.send(dst, request.reply);
+                break;
+
             case Message.RMV_PREREPLICA:
                 CoreConfiguration.print("Removing pre replica to Controller!");
                 dst = route.getDestinationArray(ID);
@@ -187,6 +198,26 @@ public class ExecutorReplierOne implements Runnable, Replier {
     @Override
     public void setReplicaContext(ReplicaContext rc) {
         this.replicaContext = replicaContext;
+    }
+
+    class Counter extends TimerTask {
+
+        int i = 0;
+        int[] dst;
+        int seq = 0;
+
+        Counter() {
+        }
+
+        @Override
+        public void run() {
+            int counterValue = handler.getCounter();
+            dst = new int[]{6};
+            int[] counter = new int[]{counterValue};
+            Message msg = new Message(Message.COUNTER, ID, seq++, intTobytes(counter));
+            TOMMessage tomMsg = new TOMMessage(CoreConfiguration.ID, 0, 0, msg.serialize(serialized1), svm.getCurrentViewId(), TOMMessageType.ORDERED_REQUEST);
+            comm.send(dst, tomMsg);
+        }
     }
 
 }

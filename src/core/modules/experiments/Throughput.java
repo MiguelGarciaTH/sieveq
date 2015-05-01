@@ -108,13 +108,14 @@ public class Throughput implements Runnable {
             out.write(" - msg/sec \n");
       
             List<Integer> sublist = messagesPerSec.subList(CoreProperties.warmup_rounds+1, messagesPerSec.size());
-            System.out.println("init="+CoreProperties.warmup_rounds);
-            System.out.println("end="+sublist.size() +" before="+messagesPerSec.size());
+//            System.out.println("init="+CoreProperties.warmup_rounds);
+//            System.out.println("end="+sublist.size() +" before="+messagesPerSec.size());
             for (Integer t : sublist) {
                 try {
-                    out.write(i++ + " " + t + "\n");
+                    out.write(i + " " + t + "\n");
                     out.flush();
-                    percentagePrint(t, sum);
+                    percentagePrint(i, sublist.size());
+                    i++;
                 } catch (IOException ex) {
                     CoreConfiguration.printException(this.getClass().getCanonicalName(), "writeFile", ex.getMessage());
                 }
@@ -148,12 +149,12 @@ public class Throughput implements Runnable {
         @Override
         public void run() {
 
-            synchronized (this) {
+//            synchronized (this) {
                 messagesPerSec.add(numberofMessages);
                 sum += numberofMessages;
                 numberofMessages = 0;
 
-            }
+//            }
         }
     }
 

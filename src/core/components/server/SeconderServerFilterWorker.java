@@ -12,7 +12,6 @@ import core.management.ServerSession;
 import core.message.Message;
 import core.management.CoreConfiguration;
 import core.modules.voter.Voter;
-import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,6 +42,9 @@ public class SeconderServerFilterWorker implements Runnable {
                 
                 boolean quorom = voter.vote(resp.getType(), resp.getSrc(), sessions, resp.getSeqNumber(), resp.getData());
                 if (quorom) {
+                    out.add(resp);
+                }
+                if(resp.getType() == Message.COUNTER){
                     out.add(resp);
                 }
             } catch (InterruptedException ex) {

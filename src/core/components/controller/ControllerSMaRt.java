@@ -61,8 +61,8 @@ public class ControllerSMaRt implements ReplyListener, Runnable {
                             blacklist.add(ids[0]);
                             operator.createReplica(nodeID);
                             CoreConfiguration.print("add replica id=" + nodeID);
-                            operator.destroyReplica(Integer.parseInt(ids[0]));
-                            CoreConfiguration.print("destroy replica id=" + ids[0]);
+//                            operator.destroyReplica(Integer.parseInt(ids[0]));
+//                            CoreConfiguration.print("destroy replica id=" + ids[0]);
                         }
                         trinco1 = true;
                         break;

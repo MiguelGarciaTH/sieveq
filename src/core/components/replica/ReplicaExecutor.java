@@ -4,6 +4,7 @@
  */
 package core.components.replica;
 
+import bftsmart.communication.ServerCommunicationSystem;
 import bftsmart.tom.MessageContext;
 import bftsmart.tom.ReplicaContext;
 import bftsmart.tom.ServiceReplica;
@@ -42,6 +43,7 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
     private WorkerPool workers;
     private Executor exec;
     protected ArrayBlockingQueue out, inCrypto, outCrypto;
+    private ServerCommunicationSystem comm;
 
     public ReplicaExecutor(int id) {
         this.ID = id;
@@ -56,6 +58,7 @@ public abstract class ReplicaExecutor extends DefaultSingleRecoverable {
         this.workers = new WorkerPool(inCrypto, outCrypto, "cryptoreplica", CoreProperties.num_workers);
         this.exec = new Executor(outCrypto, out, route, connected, replica.getSVManager());
         new Thread(exec).start();
+        
     }
 
     @Override

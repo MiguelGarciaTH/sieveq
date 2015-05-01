@@ -40,6 +40,7 @@ public class Message {
     public final static int KILL_REPLICA = 21;
     public final static int ADD_REPLICA = 22;
     public final static int CHG_REPLICA_REQUEST = 23;
+    public final static int COUNTER = 24;
 
     //private static final int SHORT_SIZE = 2;
     private static final int INT_SIZE = 4;
@@ -206,6 +207,9 @@ public class Message {
                 return "WARMUP_END_ACK";
             case ACK:
                 return "ACK";
+            case COUNTER:
+                return "COUNTER";
+
             default:
                 return "Unknown=" + getType();
         }

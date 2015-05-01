@@ -39,7 +39,7 @@ public class ServerExecutorTwo extends ServerExecutor implements Runnable, Reply
         this.firstQueue = new ArrayBlockingQueue(CoreProperties.queue_size);
         this.secondQueue = new ArrayBlockingQueue(CoreProperties.queue_size);
         this.firstFilter = new FirstServerFilter(ID, firstQueue, secondQueue, sessions);
-        this.replyManager = new ServerReplyManager(this, ID, secondQueue, sessions, proxy, lock, true);
+        this.replyManager = new ServerReplyManager(this, ID, secondQueue, sessions, proxy, lock, true, new int[4]);
         this.first = new Thread(firstFilter);
         this.third = new Thread(replyManager);
         this.cmd = new byte[5];

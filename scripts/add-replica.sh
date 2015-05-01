@@ -1,10 +1,10 @@
 #!/bin/sh
 clear
 
-gnome-terminal --title "core mis" -x bash -c "ssh -t s1.quinta sh /root/Core-MIS/scripts/kill-replica.sh 1"
+gnome-terminal --title "core mis" -x bash -c "sshpass -p quinta ssh -t s11 sh /root/Core-MIS/scripts/kill-replica.sh 1"
 
 
-gnome-terminal --title "core mis" -x bash -c "ssh -t s1.quinta 'cd Core-MIS/ ; scripts/core-mis.sh 3 replica 1 config/replica.properties'"
+gnome-terminal --title "core mis" -x bash -c "sshpass -p quinta ssh -t s11 'cd Core-MIS/ ; scripts/core-mis.sh 3 replica 1 config/replica.properties'"
 
 
 #BFTSMART="../../SMaRt"

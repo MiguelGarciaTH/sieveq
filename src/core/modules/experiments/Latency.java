@@ -71,7 +71,6 @@ public class Latency implements Runnable {
             //client
             int r = 0;
             if (client) {
-                boolean warmup = false;
                 byte[] receiveData = new byte[50];
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 start_time = System.nanoTime();
@@ -179,18 +178,4 @@ public class Latency implements Runnable {
         }
     }
 
-    private int getIndex() {
-        Iterator<Message> t = in.iterator();
-        int index = 0;
-        while (t.hasNext()) {
-            Message data = t.next();
-            // Message m = Message.deserialize(data);
-            if (data.getType() == Message.WARMUP_END) {
-//                System.out.println("Index=" + index);
-                return index;
-            }
-            index++;
-        }
-        return -1;
-    }
 }

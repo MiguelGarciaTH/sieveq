@@ -28,6 +28,7 @@ public class ServerExecutorOne extends ServerExecutor {
     private ServerReplyManager replyManager;
     private byte[] cmd;
     private CryptoScheme crypto;
+    private int[] arrivalCounter;
 
     /**
      *
@@ -41,8 +42,8 @@ public class ServerExecutorOne extends ServerExecutor {
         this.orderedQueue = new ArrayBlockingQueue(CoreProperties.queue_size);
         this.firstFilter = new FirstServerFilter(ID, firstQueue, secondQueue, sessions);
         this.secondFilter = new SecondServerFilter(secondQueue, thirdQueue, sessions, voter);
-
-        this.replyManager = new ServerReplyManager(this, ID, thirdQueue, sessions, proxy, lock, false);
+        this.arrivalCounter = new int[4];
+        this.replyManager = new ServerReplyManager(this, ID, thirdQueue, sessions, proxy, lock, false, arrivalCounter);
         this.first = new Thread(firstFilter);
         this.second = new Thread(secondFilter);
         this.third = new Thread(replyManager);
@@ -75,6 +76,7 @@ public class ServerExecutorOne extends ServerExecutor {
         byte[] data = reply.getContent();
         try {
             Message resp = validate(data);
+            arrivalCounter[reply.getSender()]++;
             firstQueue.put(resp);
         } catch (InterruptedException ex) {
             firstQueue.clear();
