@@ -5,8 +5,8 @@
  */
 package core.components.workerpool;
 
-import core.message.Message;
-import core.message.ByteArrayWrap;
+import core.management.Message;
+import core.management.ByteArrayWrap;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.modules.crypto.CryptoScheme;
@@ -29,9 +29,9 @@ public class CryptoWorkerClient extends Worker {
 //      private byte[] serl = new byte[Message.HEADER_SIZE + CoreProperties.message_size + (CoreProperties.hmac_key_size * 4)];
 
     private ByteBuffer serialized = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
-    private ThreadBlockQueue threadQueue;
+    private DataBlockQueue threadQueue;
 
-    CryptoWorkerClient(int tid, ArrayBlockingQueue in, ArrayBlockingQueue out, ThreadBlockQueue threadQueue) {
+    CryptoWorkerClient(int tid, ArrayBlockingQueue in, ArrayBlockingQueue out, DataBlockQueue threadQueue) {
         super(tid, in, out);
         this.fact = new CryptoSchemeFactory();
         this.crypto = fact.getNewCryptoScheme(CoreProperties.crypto_scheme);
@@ -52,7 +52,8 @@ public class CryptoWorkerClient extends Worker {
                 //!!!!!! Configuraçao 1!!!!!
 //                out.add(new ByteArrayWrap(serl, (numbytes + (CoreProperties.hmac_key_size * 4))));
                 //!!!!!! Configuraçao 2!!!!!
-                out.add(new ByteArrayWrap(serl, (numbytes + CoreProperties.signature_key_size + CoreProperties.hmac_key_size)));
+                ByteArrayWrap b =new ByteArrayWrap(serl, (numbytes + CoreProperties.signature_key_size + CoreProperties.hmac_key_size));
+                out.add(b);
 
             }
         } catch (InterruptedException ex) {

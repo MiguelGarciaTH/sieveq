@@ -13,7 +13,7 @@ import java.util.TreeMap;
  *
  * @author miguel
  */
-public class RouteTable implements Serializable{
+public class RouteTable implements Serializable {
     //<src, dsts>
 
     private TreeMap<Integer, LinkedList<Integer>> route;
@@ -22,8 +22,17 @@ public class RouteTable implements Serializable{
         this.route = new TreeMap<Integer, LinkedList<Integer>>();
     }
 
+    public void printString(){
+        for (Integer g : route.keySet()) {
+            System.out.println("ID = " + g );
+            for (Integer r : route.get(g)) {
+                System.out.println("\tELEM = " + r);
+            }
+            
+        }
+        
+    }
     public void addRoute(Integer src, Integer dst) {
-        System.out.println("ADD ROUTE org=" + src + " dst=" + dst);
         if (route.containsKey(src)) {
             if (!(route.get(src).contains(dst))) {
                 route.get(src).add(dst);
@@ -36,6 +45,22 @@ public class RouteTable implements Serializable{
         }
     }
 
+    public void addSourceRoute(Integer src) {
+        if (!route.containsKey(src)) {
+            route.put(src, null);
+        }
+    }
+
+    public void addDestinyRoute(Integer src, Integer dst) {
+        if (route.containsKey(src)) {
+            route.get(src).addAll(Arrays.asList(dst));
+        } else {
+            LinkedList<Integer> lst = new LinkedList<Integer>();
+            lst.addAll(Arrays.asList(dst));
+            route.put(src, lst);
+        }
+    }
+
     public void prettyPrint() {
         for (Integer k : route.keySet()) {
             System.out.print("Key=[" + k);
@@ -44,7 +69,7 @@ public class RouteTable implements Serializable{
                 System.out.print(" " + integer);
             }
             System.out.println("]");
-           
+
         }
     }
 

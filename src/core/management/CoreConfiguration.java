@@ -5,10 +5,13 @@
  */
 package core.management;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.misc.BASE64Encoder;
+
+
 
 /**
  *
@@ -21,12 +24,13 @@ public class CoreConfiguration {
     static public String role;
     static public String crypto_scheme;
     static public String crypto_description;
-    static private BASE64Encoder encoder;
+//    static private BASE64Encoder encoder;
     static public boolean channel;
     static private String template;
+    static private String ip, name;
 
     public static CoreConfiguration getConfiguration(int ID, String role) {
-        encoder = new BASE64Encoder();
+//        encoder = new BASE64Encoder();
         if (config == null) {
             return new CoreConfiguration(ID, role);
         } else {
@@ -52,9 +56,17 @@ public class CoreConfiguration {
     }
 
     private CoreConfiguration(int ID, String role) {
-        this.ID = ID;
-        this.role = role;
-        this.template = "[" + role + " id=" + ID + "]: ";
+        try {
+            CoreConfiguration.ID = ID;
+            this.role = role;
+            this.template = "[" + role + " id=" + ID + "]: ";
+            String ipaux = InetAddress.getLocalHost().getHostAddress();
+            this.name = InetAddress.getLocalHost().getHostName();
+            this.ip = ipaux.replaceAll("/", "");
+            this.template = "[" + role + " "+ ID +"@"+name+"]: ";
+        } catch (IOException ex) {
+            Logger.getLogger(CoreConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
@@ -62,11 +74,11 @@ public class CoreConfiguration {
         String print = "---------------------------------------------------------------\n";
         print = print.concat(">> core-mis configuration:\n");
         print = print.concat(">> Role=" + role + " ID=" + ID + " \n");
+        print = print.concat(">> IP=" + ip + " Name=" + name + " \n");
         print = print.concat(">> Crytpo scheme=" + crypto_scheme + " : " + crypto_description + " \n");
         print = print.concat(">> Channel reliable=" + channel + "\n");
         print = print.concat("---------------------------------------------------------------\n");
         return print;
-
     }
 
     public static void print(String text) {
@@ -82,9 +94,9 @@ public class CoreConfiguration {
         CoreConfiguration.crypto_description = description;
     }
 
-    public static void debug(String title, byte[] var) {
-        System.out.println(title + "= " + encoder.encode(var));
-    }
+//    public static void debug(String title, byte[] var) {
+//        System.out.println(title + "= " + encoder.encode(var));
+//    }
 
     public static void debug(String title, int[] var) {
         System.out.println(title + "= " + Arrays.toString(var));

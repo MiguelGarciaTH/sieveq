@@ -5,9 +5,9 @@
  */
 package core.components.server;
 
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreProperties;
-import core.misc.Lock;
+import core.management.Lock;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -22,7 +22,6 @@ class OrderQueue implements Runnable {
     private ArrayBlockingQueue unordered, ordered;
     private Message[] batch;
     private Quicksort sort;
-
     private RemindTask task;
     private Timer timer;
     private Lock lock;
@@ -35,7 +34,6 @@ class OrderQueue implements Runnable {
         batch = new Message[BACTH_SIZE];
         sort = new Quicksort();
         this.lock = new Lock();
-        System.out.println("Time out=" + CoreProperties.timeout);
     }
 
     @Override
@@ -52,7 +50,6 @@ class OrderQueue implements Runnable {
                     batch[messages++] = (Message) unordered.remove();
                 }
             }
-            System.out.println("Is locked? " + lock.isLocked());
             timer.cancel();
             System.out.println("batch=" + messages + " elasped=" + ((System.nanoTime() - init) / 1000000000.0) + "secs" + " time out =" + CoreProperties.timeout);
             sort.sort(batch, messages);

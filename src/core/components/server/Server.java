@@ -12,23 +12,14 @@ import core.management.CoreProperties;
  */
 public class Server {
 
-    private int ID;
-    private Thread exec;
-    private CoreProperties prop;
+    private final int ID;
+    private final Thread exec;
+    private final CoreProperties prop;
+
     public Server(int mode, int id, CoreProperties prop) {
-        this.prop=prop;
+        this.prop = prop;
         this.ID = id;
-        switch (mode) {
-            case 1:
-                exec = new Thread(new ServerExecutorOne(ID));
-                break;
-            case 2:
-                exec = new Thread(new ServerExecutorTwo(ID));
-                break;
-            case 3:
-                exec = new Thread(new ServerExecutorOne(ID));
-                break;
-        }
+        exec = new Thread(new ServerExecutor(ID));
     }
 
     public void start() {

@@ -16,12 +16,12 @@ public class Client {
     public Client(int mode, int id, int dst) {
         this.ID = id;
         switch (mode) {
-            case 1:
-                exec = new Thread(new ClientExecutorOne(ID, dst));
-                break;
-            case 2:
-                exec = new Thread(new ClientExecutorTwo(ID, dst));
-                break;
+//            case 1:
+//                exec = new Thread(new ClientExecutorOne(ID, dst));
+//                break;
+//            case 2:
+//                exec = new Thread(new ClientExecutorTwo(ID, dst));
+//                break;
             case 3:
                 exec = new Thread(new ClientExecutorThree(ID, dst));
                 break;

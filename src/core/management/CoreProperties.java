@@ -41,12 +41,7 @@ public class CoreProperties {
     static public String operator;
     static public boolean channel;
     static public int MAX_BUFFERED;
-//malicious experiment
-    static public boolean malicious;
-    static public double probability;
-    static public boolean random_probability;
-    static public int num_bytes;
-    static public boolean random_bytes;
+
     static public String target;
     static public int max_queue;
     static public int batch_size;
@@ -55,12 +50,15 @@ public class CoreProperties {
     static public int targetID;
     static public long timeout;
     public static int ACK_RATE;
-    public static int malicious_id;
+
     static public int attack_threads;
     static public int size_message;
     static public String target_ip, experiment_type;
     static public int target_port;
     static public int rate_message;
+    public static String rules;
+    public static int patternlenght;
+    public static int numberofpatterns;
 
     public CoreProperties(String file, String type) {
         try {
@@ -76,15 +74,13 @@ public class CoreProperties {
                     ip = prop.getProperty("core.attacker.target.ip");
                     crypto_scheme = prop.getProperty("core.crypto.scheme");
                     payload = Integer.parseInt(prop.getProperty("core.attacker.payload"));
-                    targetID = Integer.parseInt(prop.getProperty("core.attacker.targetID"));
-
+//                    targetID = Integer.parseInt(prop.getProperty("core.attacker.targetID"));
                     break;
                 case "client":
                     debug = Boolean.parseBoolean(prop.getProperty("core.debug"));
                     num_replicas = Integer.parseInt(prop.getProperty("core.replicas"));
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
                     experiment_type = prop.getProperty("core.experiments.type");
-
                     quorom = Integer.parseInt(prop.getProperty("core.replicas.quorom"));
                     warmup_rounds = Integer.parseInt(prop.getProperty("core.warmup"));
                     experiment_rounds = Integer.parseInt(prop.getProperty("core.rounds"));
@@ -109,12 +105,6 @@ public class CoreProperties {
                     channel = Boolean.parseBoolean(prop.getProperty("core.channel"));
                     max_queue = Integer.parseInt(prop.getProperty("core.rounds")) * Integer.parseInt(prop.getProperty("core.experiments.messageRate"));
                     MAX_BUFFERED = Integer.parseInt(prop.getProperty("core.channel.max_buffered"));
-                    //
-                    malicious = Boolean.parseBoolean(prop.getProperty("core.malicious.on"));
-                    probability = Double.parseDouble(prop.getProperty("core.malicious.probability"));
-                    random_bytes = Boolean.parseBoolean(prop.getProperty("core.malicious.random_bytes_on"));
-                    num_bytes = Integer.parseInt(prop.getProperty("core.malicious.random_bytes"));
-                    target = prop.getProperty("core.malicious.target");
                     break;
                 case "replica":
                     channel = false;
@@ -122,10 +112,12 @@ public class CoreProperties {
                     rate_message = Integer.parseInt(prop.getProperty("core.attacker.rate"));
                     size_message = Integer.parseInt(prop.getProperty("core.attacker.size"));
                     target_ip = prop.getProperty("core.attacker.target.ip");
+                    rules = prop.getProperty("core.rules");
+                    numberofpatterns = Integer.parseInt(prop.getProperty("core.numberofpatterns"));
+                    patternlenght = Integer.parseInt(prop.getProperty("core.patternlenght"));
                     target_port = Integer.parseInt(prop.getProperty("core.attacker.target.port"));
                     payload = Integer.parseInt(prop.getProperty("core.attacker.payload"));
                     targetID = Integer.parseInt(prop.getProperty("core.attacker.targetID"));
-
                     num_workers = Integer.parseInt(prop.getProperty("core.number_workers"));
                     debug = Boolean.parseBoolean(prop.getProperty("core.debug"));
                     queue_size = Integer.parseInt(prop.getProperty("core.queue_size"));
@@ -139,13 +131,6 @@ public class CoreProperties {
                     signature_key_size = Integer.parseInt(prop.getProperty("core.crypto.signature.keySize"));
                     hmac_key_size = Integer.parseInt(prop.getProperty("core.crypto.mac.keySize"));
                     // throughput_experiments_file = prop.getProperty("core.experiments.file");
-
-                    malicious_id = Integer.parseInt(prop.getProperty("core.malicious.on.id"));
-                    malicious = Boolean.parseBoolean(prop.getProperty("core.malicious.on"));
-                    probability = Double.parseDouble(prop.getProperty("core.malicious.probability"));
-                    random_bytes = Boolean.parseBoolean(prop.getProperty("core.malicious.random_bytes_on"));
-                    num_bytes = Integer.parseInt(prop.getProperty("core.malicious.random_bytes"));
-                    target = prop.getProperty("core.malicious.target");
                     break;
                 case "prereplica":
                     channel = false;

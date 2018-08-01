@@ -6,7 +6,6 @@ gnome-terminal --title "core mis" -x bash -c "sshpass -p quinta ssh -t s11 sh /r
 
 gnome-terminal --title "core mis" -x bash -c "sshpass -p quinta ssh -t s11 'cd Core-MIS/ ; scripts/core-mis.sh 3 replica 1 config/replica.properties'"
 
-
 #BFTSMART="../../SMaRt"
 #export PATH=$PATH:../../SMaRt/config
 #echo "$PATH"

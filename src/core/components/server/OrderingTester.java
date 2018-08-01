@@ -5,7 +5,7 @@
  */
 package core.components.server;
 
-import core.message.Message;
+import core.management.Message;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;

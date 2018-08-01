@@ -5,7 +5,7 @@
  */
 package core.modules.experiments;
 
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import java.io.BufferedWriter;
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -119,7 +118,7 @@ public class Latency implements Runnable {
             CoreConfiguration.printException(this.getClass().getCanonicalName(), "run", ex.getMessage());
         }
     }
-
+    
     private void writeFile() {
         System.out.println("[Experiments] writing file results");
         long write_start_time = System.nanoTime();
@@ -159,9 +158,10 @@ public class Latency implements Runnable {
             }
             out.close();
             outputFileStream.close();
-            CoreConfiguration.print("nulls=" + ack_failure + " negatives=" + negative + " compared=" + compared);
-            double minutes = ((System.nanoTime() - write_start_time) / 1000000000.0) / 60;
-            CoreConfiguration.print("[Experiments] write finished" + minutes + " minutes");
+            CoreConfiguration.print("\n\nAVG latency= " + avg/subSize+"\n\n");
+//            CoreConfiguration.print("nulls=" + ack_failure + " negatives=" + negative + " compared=" + compared);
+//            double minutes = ((System.nanoTime() - write_start_time) / 1000000000.0) / 60;
+//            CoreConfiguration.print("[Experiments] write finished" + minutes + " minutes");
         } catch (IOException ex) {
             ex.printStackTrace();
             CoreConfiguration.printException(this.getClass().getCanonicalName(), "writeFile2", ex.getMessage());

@@ -7,7 +7,6 @@ package core.modules.crypto;
 
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
-import core.modules.crypto.tools.CryptoMAC;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;

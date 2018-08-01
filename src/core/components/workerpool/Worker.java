@@ -6,7 +6,6 @@
 package core.components.workerpool;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *

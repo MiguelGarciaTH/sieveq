@@ -5,13 +5,16 @@
 package core.components.server;
 
 import bftsmart.communication.client.ReplyListener;
+import bftsmart.tom.AsynchServiceProxy;
+
 import bftsmart.tom.ServiceProxy;
+import bftsmart.tom.core.messages.TOMMessageType;
 import core.components.controller.ControllerOpreatorProcesses;
 import core.management.ServerSession;
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
-import core.misc.Lock;
+import core.management.Lock;
 import core.modules.experiments.Experiment;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -31,33 +34,35 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServerReplyManager implements Runnable {
 
-    private RemindTask task;
-    private Timer timer;
-    private BlockingQueue inQueue;
-    private ConcurrentHashMap<Integer, ServerSession> sessions;
-    private ServiceProxy proxy;
-    private Lock lock;
-    private int ID;
-    private ReplyListener reply;
-    private ArrayBlockingQueue experimentQueue;
-    private Experiment experiment;
+    private final RemindTask task;
+    private final Timer timer;
+    private final BlockingQueue inQueue;
+    private final ConcurrentHashMap<Integer, ServerSession> sessions;
+//    private final ServiceProxy proxy;
+    private final AsynchServiceProxy proxy;
+    private final Lock lock;
+    private final int ID;
+    private final ReplyListener reply;
+    private final ArrayBlockingQueue experimentQueue;
+    private final Experiment experiment;
     private int numberofMessages = 0;
-    protected ByteBuffer serialized1 = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
-    private int total = CoreProperties.messageRate * CoreProperties.experiment_rounds + CoreProperties.messageRate * CoreProperties.warmup_rounds;
+    protected final ByteBuffer serialized1 = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
+    private final int total = CoreProperties.messageRate * CoreProperties.experiment_rounds + CoreProperties.messageRate * CoreProperties.warmup_rounds;
     private int current = 0;
-    private int[] arrivalCounter;
-    private HashMap<Integer, int[]> monit;
-    private int[] podium;
-    private ControllerOpreatorProcesses operator;
+    private final int[] arrivalCounter;
+    private final HashMap<Integer, int[]> monit;
+    private final int[] podium;
+    private final ControllerOpreatorProcesses operator;
 
-    public ServerReplyManager(ServerExecutor aThis, int ID, BlockingQueue thirdQueue, ConcurrentHashMap<Integer, ServerSession> sessions, ServiceProxy proxy, Lock lock, boolean primaryBackup, int[] arrivalCounter) {
+//    public ServerReplyManager(ServerExecutor aThis, int ID, BlockingQueue thirdQueue, ConcurrentHashMap<Integer, ServerSession> sessions, ServiceProxy proxy, Lock lock, boolean primaryBackup, int[] arrivalCounter) {
+    public ServerReplyManager(ServerExecutor aThis, int ID, BlockingQueue thirdQueue, ConcurrentHashMap<Integer, ServerSession> sessions, AsynchServiceProxy proxy, Lock lock, boolean primaryBackup, int[] arrivalCounter) {
         this.ID = ID;
         this.inQueue = thirdQueue;
         this.sessions = sessions;
         this.lock = lock;
         this.proxy = proxy;
         this.reply = aThis;
-        this.experimentQueue = new ArrayBlockingQueue(total + 5);
+        this.experimentQueue = new ArrayBlockingQueue(total * 8);
         this.experiment = new Experiment(CoreProperties.experiment_type, null, null, experimentQueue);
         this.task = new RemindTask();
         this.timer = new Timer();
@@ -94,7 +99,6 @@ public class ServerReplyManager implements Runnable {
                 switch (resp.getType()) {
                     case Message.COUNTER:
                         monit(resp.getSrc(), resp.getSeqNumber(), byteArrayToInt(resp.getData()));
-//                        System.out.println("id=" + resp.getSrc() + " seq=" + resp.getSeqNumber() + " counter=" + byteArrayToInt(resp.getData()));
                         break;
                     case Message.HELLO_ACK:
                         CoreConfiguration.print("Hello ack received");
@@ -111,26 +115,33 @@ public class ServerReplyManager implements Runnable {
                     case Message.SEND_REQUEST:
                         experimentQueue.add(resp);
                         numberofMessages++;
-                        if (resp.getSeqNumber() % CoreProperties.ACK_RATE == 0) {
-                            String ack = resp.getSeqNumber() + "";
-                            Message resp2 = new Message(Message.ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), ack.getBytes());
-                            proxy.invokeAsynchronous(resp2.serialize(serialized1), reply, processes);
-                        }
+//                        if (resp.getSeqNumber() % CoreProperties.ACK_RATE == 0) {
+//                            String ack = resp.getSeqNumber() + "";
+//                            Message resp2 = new Message(Message.ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), ack.getBytes());
+//                            proxy.invokeAsynchronous(resp2.serialize(serialized1), reply, processes);
+//                        }
                         break;
                     case Message.CHG_PREREPLICA_REQUEST:
                         resp = new Message(Message.ADD_PREREPLICA, ID, 0, new String("7:8").getBytes());
                         CoreConfiguration.print("Add pre-replica [simulation]");
-                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
-                        resp = new Message(Message.CHG_PREREPLICA, ID, sessions.get(7).incrementeOutSequenceNumber(), "192.168.3.27:6504:8".getBytes());
+//                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+
+                        proxy.invokeAsynchRequest(resp.serialize(serialized1), processes, reply, TOMMessageType.UNORDERED_REQUEST);
+                        resp = new Message(Message.CHG_PREREPLICA, ID, sessions.get(7).incrementeOutSequenceNumber(), "192.168.3.25:6502:8".getBytes());
+                        proxy.cleanAsynchRequest(resp.getSeqNumber());
                         CoreConfiguration.print("Change pre-replica needed [simulation]");
-                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+                        proxy.invokeAsynchRequest(resp.serialize(serialized1), processes, reply, TOMMessageType.UNORDERED_REQUEST);
+                        proxy.cleanAsynchRequest(resp.getSeqNumber());
+//                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+
                         break;
                     case Message.CHG_REPLICA_REQUEST:
                         resp = new Message(Message.ADD_REPLICA, ID, 0, new String("2:2").getBytes());
                         CoreConfiguration.print("Add replica [simulation]");
-                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+                        proxy.invokeAsynchRequest(resp.serialize(serialized1), processes, reply, TOMMessageType.UNORDERED_REQUEST);
+                        proxy.cleanAsynchRequest(resp.getSeqNumber());
 //                        resp = new Message(Message.CHG_REPLICA, ID, sessions.get(7).incrementeOutSequenceNumber(), "192.168.3.27:6504:8".getBytes());
-//                        CoreConfiguration.print("Change replica needed [simulation]");
+                        CoreConfiguration.print("Change replica needed [simulation]");
 //                        proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
                         break;
                     case Message.END_REQUEST:
@@ -141,6 +152,7 @@ public class ServerReplyManager implements Runnable {
                             CoreConfiguration.print("End ack to=" + resp.getSrc());
                             resp = new Message(Message.END_ACK, ID, sessions.get(resp.getSrc()).incrementeOutSequenceNumber(), new byte[]{0});
 //                            proxy.invokeAsynchronous(resp.serialize(serialized1), reply, processes);
+                            proxy.invokeAsynchRequest(resp.serialize(serialized1), processes, reply, TOMMessageType.UNORDERED_REQUEST);
                             CoreConfiguration.print("**FINISH**");
                             sessions.remove(resp.getSrc());
                         }
@@ -148,6 +160,7 @@ public class ServerReplyManager implements Runnable {
                     default:
                         CoreConfiguration.print("Unknown type=" + resp);
                 }
+
             } catch (InterruptedException ex) {
                 CoreConfiguration.printException(this.getClass().getCanonicalName(), "run()", ex.getMessage());
             }
@@ -172,7 +185,7 @@ public class ServerReplyManager implements Runnable {
         for (int i : cli) {
             if (!sessions.containsKey(i)) {
                 sessions.put(i, new ServerSession(i, 0, new int[]{0, 0, 0, 0}, ID, true));
-                CoreConfiguration.print("adding client= " + sessions.get(i));
+//                CoreConfiguration.print("adding client= " + sessions.get(i));
                 return true;
             }
         }
@@ -193,20 +206,20 @@ public class ServerReplyManager implements Runnable {
                     timer.cancel();
                 }
             }
-            System.out.println("Messages delivered=" + numberofMessages);
+            System.out.println("Throughput= " + numberofMessages);
             numberofMessages = 0;
-            if (current > 0) {
-                int[] t = monit.get(current);
-                System.out.println("Seq=" + current + " counters=[ " + t[0] + "," + t[1] + ", " + t[2] + ", " + t[3] + " ]");
-                max(arrivalCounter, podium);
-                max(arrivalCounter, podium);
-                arrivalCounter[0] = 0;
-                arrivalCounter[1] = 0;
-                arrivalCounter[2] = 0;
-                arrivalCounter[3] = 0;
-                System.out.println("Faster=[ " + podium[0] + "," + podium[1] + ", " + podium[2] + ", " + podium[3] + " ]");
-                detector();
-            }
+//            if (current > 0) {
+//                int[] t = monit.get(current);
+//                System.out.println("Seq=" + current + " counters=[ " + t[0] + "," + t[1] + ", " + t[2] + ", " + t[3] + " ]");
+//                max(arrivalCounter, podium);
+//                max(arrivalCounter, podium);
+//                arrivalCounter[0] = 0;
+//                arrivalCounter[1] = 0;
+//                arrivalCounter[2] = 0;
+//                arrivalCounter[3] = 0;
+//                System.out.println("Faster=[ " + podium[0] + "," + podium[1] + ", " + podium[2] + ", " + podium[3] + " ]");
+//                detector();
+//            }
         }
     }
     boolean once = true;
@@ -215,7 +228,7 @@ public class ServerReplyManager implements Runnable {
         if (once) {
             if (current > 10) {
                 int[] t = monit.get(current);
-                if (t[2] > t[0]+ (t[0]/2)) {
+                if (t[2] > t[0] + (t[0] / 2)) {
                     System.out.println("KILLLING");
                     operator.createReplica(1);
                     once = false;

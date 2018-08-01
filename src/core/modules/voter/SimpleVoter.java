@@ -5,6 +5,7 @@
 package core.modules.voter;
 
 import core.management.ServerSession;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -14,41 +15,49 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author miguel
  */
-public class SimpleVoter extends Voter {
+public class SimpleVoter {
 
-    private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Vote>> votes;
-    private int replicas;
-    private int quorom;
-
+    private final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Vote>> votes;
+    private final int replicas;
+    private final int quorom;
+    private int expected = 0;
     private Vote vote = null;
     private boolean hasQuorom = false;
+    private final HashSet<String> history;
 
     public SimpleVoter(int replicas, int quorom) {
         this.replicas = replicas;
         this.quorom = quorom;
         this.votes = new ConcurrentHashMap<>();
+        this.history = new HashSet<>();
+
     }
 
     public SimpleVoter(int replicas, int quorom, ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Vote>> votes) {
         this.replicas = replicas;
         this.quorom = quorom;
         this.votes = votes;
+        this.history = new HashSet<>();
     }
 
-    @Override
     public synchronized boolean vote(int type, int src, ConcurrentHashMap<Integer, ServerSession> sessions, int sequenceNumber, byte[] message) {
         vote = getVote(src, sequenceNumber, getSequenceNumberList(src), message);
         hasQuorom = checkVote(vote, message);
+//&& !history.contains(src+" "+sequenceNumber)
         if (hasQuorom) {
-            sessions.get(src).incrementeInSequenceNumber();
+//            history.add(src+" "+sequenceNumber);
+//            System.out.println("Message =" + sequenceNumber);
+//            expected++;
+//            sessions.get(src).incrementeInSequenceNumber();
             if (sequenceNumber % 1000 == 0) {
                 cleanVotes(sessions.get(src));
             }
+            return hasQuorom;
         }
-        return hasQuorom;
+        return false;
+
     }
 
-    @Override
     public boolean vote(int src, ServerSession session, int sequenceNumber, byte[] message) {
         vote = getVote(src, sequenceNumber, getSequenceNumberList(src), message);
         hasQuorom = checkVote(vote, message);
@@ -61,19 +70,9 @@ public class SimpleVoter extends Voter {
         return hasQuorom;
     }
 
-    @Override
-    public boolean vote(int src, int sequenceNumber, byte[] message) {
-        if ((vote = getVote(src, sequenceNumber, getSequenceNumberList(src), message)) != null) {
-            if (!vote.clean()) {
-                hasQuorom = checkVote(vote, message);
-            }
-        }
-        return hasQuorom;
-    }
-
     private ConcurrentHashMap<Integer, Vote> getSequenceNumberList(int src) {
         if (votes.get(src) == null) {
-            votes.putIfAbsent(src, new ConcurrentHashMap<Integer, Vote>());
+            votes.putIfAbsent(src, new ConcurrentHashMap<>());
         }
         return votes.get(src);
     }

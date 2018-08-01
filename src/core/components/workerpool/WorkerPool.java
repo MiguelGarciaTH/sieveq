@@ -19,13 +19,15 @@ public class WorkerPool {
     private String type;
 
     private ArrayBlockingQueue in, out;
-    private ThreadBlockQueue queue;
+    private int num_workers;
+    private DataBlockQueue queue;
 
     public WorkerPool(ArrayBlockingQueue in, ArrayBlockingQueue out, String type, int numb_workers) {
         fact = new WorkerFactory();
         this.in = in;
         this.out = out;
         this.type = type;
+        this.num_workers = numb_workers;
         workers = new LinkedList<>();
         for (int i = 0; i < numb_workers; i++) {
             workers.add(new Thread(fact.getWorker(type, i, this.in, this.out)));
@@ -33,18 +35,25 @@ public class WorkerPool {
         }
     }
 
-    public WorkerPool(ArrayBlockingQueue in, ArrayBlockingQueue out, ThreadBlockQueue queue, String type, int numb_workers) {
+    public WorkerPool(ArrayBlockingQueue in, ArrayBlockingQueue out, DataBlockQueue queue, String type, int numb_workers) {
         fact = new WorkerFactory();
         this.in = in;
         this.out = out;
-        this.queue=queue;
+        this.queue = queue;
         this.type = type;
+        this.num_workers = numb_workers;
         workers = new LinkedList<>();
         for (int i = 0; i < numb_workers; i++) {
             workers.add(new Thread(fact.getWorker(type, i, this.in, this.out, this.queue)));
             workers.get(i).start();
         }
     }
+
+//    public void addWorker() {
+//        num_workers++;
+//        workers.add(new Thread(fact.getWorker(type,num_workers, this.in, this.out)));
+//        workers.get(num_workers).start();
+//    }
 
     public void stopWorkers() {
         for (Thread worker : workers) {

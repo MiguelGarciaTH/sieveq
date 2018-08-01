@@ -5,14 +5,14 @@
 package core.components.client;
 
 import com.google.common.util.concurrent.RateLimiter;
-import core.components.workerpool.ThreadBlockQueue;
+import core.components.workerpool.DataBlockQueue;
 import core.components.workerpool.WorkerPool;
 import core.management.ServerSession;
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.modules.experiments.Experiment;
-import core.modules.malicious.Malicious;
+
 import core.modules.voter.SimpleVoter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -42,19 +42,19 @@ public abstract class ClientExecutor implements Runnable {
     protected long initTime, finishTime;
     private final int total;
     private double history_percentage = 0;
-    protected Malicious malicious;
     protected WorkerPool pool;
     protected ArrayBlockingQueue<Message> in;
     protected LinkedBlockingQueue<Message> inAux;
     protected LinkedBlockingQueue inQueue;
     protected ArrayBlockingQueue<byte[]> out;
     protected ByteBuffer deserialized = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
-    protected ThreadBlockQueue threadQueue;
+    protected DataBlockQueue threadQueue;
     protected int[] senSeq;
     int msg_len;
+    //static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    static final String AB = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 //    private OGEvemtGenerator generator;
-
     ClientExecutor(int ID, int dst) {
         this.ID = ID;
         this.destination = dst;
@@ -69,20 +69,22 @@ public abstract class ClientExecutor implements Runnable {
         this.in = new ArrayBlockingQueue(CoreProperties.queue_size);
         this.inAux = new LinkedBlockingQueue<>();
         this.inQueue = new LinkedBlockingQueue<>();
+
         //Conf 2!!!        
 //        int size = Message.HEADER_SIZE + prop.message_size + (prop.hmac_key_size*4);
 //        msg_len = Message.getHeaderSize() + (prop.hmac_key_size * 4);
-
         //Conf 1!!!
         int size = Message.HEADER_SIZE + prop.message_size + prop.signature_key_size + prop.hmac_key_size;
         msg_len = Message.getHeaderSize() + prop.hmac_key_size + prop.signature_key_size;
 
-        this.threadQueue = new ThreadBlockQueue(prop.messageRate * prop.experiment_rounds + 10, size + 4);
+        this.threadQueue = new DataBlockQueue(prop.messageRate * 2, size + 4);
         this.out = new ArrayBlockingQueue(CoreProperties.queue_size);
         this.pool = new WorkerPool(in, out, threadQueue, "crypto", CoreProperties.num_workers);
         this.sent = new Long[total + 5];
         this.senSeq = new int[sent.length];
-        this.experiment = new Experiment(CoreProperties.experiment_type, senSeq, sent, inQueue);
+        if (ID == 7) {
+            this.experiment = new Experiment(CoreProperties.experiment_type, senSeq, sent, inQueue);
+        }
 //        this.generator = new OGEvemtGenerator();
 //        this.generator.loadEventFile("./config/maxi-test-log.log");
 //        this.generator.getStatistics();
@@ -93,9 +95,12 @@ public abstract class ClientExecutor implements Runnable {
     private void send(int type, int sequenceNumber, byte[] cmd) {
         Message send = new Message(type, ID, sequenceNumber, cmd);
         in.add(send);
-        inQueue.add(send);
+        if (ID == 7) {
+            inQueue.add(send);
+        }
         senSeq[sequenceNumber] = sequenceNumber;
         sent[sequenceNumber] = System.nanoTime();
+
 //        inAux.add(send);
     }
 
@@ -105,7 +110,14 @@ public abstract class ClientExecutor implements Runnable {
             int payloadSize = prop.message_size > msg_len ? (prop.message_size - msg_len) : prop.message_size;
             byte[] cmd = new byte[payloadSize];
             ByteBuffer dst = ByteBuffer.allocate(4);
-            new Random().nextBytes(cmd);
+            //new Random().nextBytes(cmd);
+//            cmd = "testeasdasdasdasddasds".getBytes();
+            StringBuilder sb = new StringBuilder(prop.message_size);
+            Random r = new Random();
+            for (int i = 0; i < prop.message_size; i++) {
+                sb.append(AB.charAt(r.nextInt(AB.length())));
+            }
+            cmd = sb.toString().getBytes();
             int seq = sessions.get(0).incrementeOutSequenceNumber();
             new Thread(experiment).start();
             send(Message.HELLO, seq, cmd);
@@ -113,22 +125,27 @@ public abstract class ClientExecutor implements Runnable {
             while (lock) {
                 CoreConfiguration.pause(1);
                 System.out.print(". ");
+                send(Message.HELLO, seq, cmd);
+                CoreConfiguration.print("HELLO SENT");
             }
             dst.putInt(destination);
-            send(Message.ADD_ROUTE, sessions.get(0).incrementeOutSequenceNumber(), dst.array());
-            CoreConfiguration.pause(3);
             seq = sessions.get(destination).incrementeOutSequenceNumber();
-            RateLimiter rateLimiter = RateLimiter.create(CoreProperties.messageRate);
+            RateLimiter rateLimiter = rateLimiter = RateLimiter.create(CoreProperties.messageRate);//RateLimiter.create(CoreProperties.messageRate / 3);
             while (true) {
                 rateLimiter.acquire();
-                //cmd = generator.getRandomEvent().getBytes();
+//                cmd = generator.getRandomEvent().getBytes();
                 send(Message.SEND_REQUEST, seq++, cmd);
+//                if (seq == CoreProperties.warmup_rounds * CoreProperties.messageRate) {
+//                    rateLimiter = RateLimiter.create(CoreProperties.messageRate);
+//                }
                 if (seq == (CoreProperties.warmup_rounds * CoreProperties.messageRate + CoreProperties.experiment_rounds * CoreProperties.messageRate)) {
                     break;
                 }
             }
-            send(Message.END_REQUEST, seq++, cmd);
-            System.out.println("\t\t******Client Executor Finished*******");
+            if (ID == 7) {
+                send(Message.END_REQUEST, seq++, cmd);
+                System.out.println("\t\t******Client Executor Finished*******");
+            }
 //            generator.getStatistics();
         } catch (Exception ex) {
             Logger.getLogger(ClientExecutor.class.getName()).log(Level.SEVERE, null, ex);

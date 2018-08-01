@@ -4,11 +4,9 @@
  */
 package core.components.client;
 
-import core.components.client.network.ClientTCPSend;
-import core.components.client.network.ClientTCPReceiveThread;
 import core.components.workerpool.WorkerPool;
 import core.management.ServerSession;
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import java.util.Iterator;
@@ -21,12 +19,16 @@ public class ClientExecutorThree extends ClientExecutor implements Runnable, For
 
     private ClientTCPSend snd;
     private ClientTCPReceiveThread rcv;
-    private Thread t1, t2;
+    private Thread t1;
     private boolean trinco = true;
 
     ClientExecutorThree(int ID, int dst) {
         super(ID, dst);
-        rcv = new ClientTCPReceiveThread(prop.listen_port, this);
+        int port = prop.listen_port;
+        if (ID != 7) {
+            port = port + ID;
+        }
+        rcv = new ClientTCPReceiveThread(port, this);
         snd = new ClientTCPSend(prop.ip, prop.destiny_port, out, inQueue, threadQueue);
         t1 = new Thread(snd);
         new Thread(rcv).start();
@@ -41,8 +43,10 @@ public class ClientExecutorThree extends ClientExecutor implements Runnable, For
     public void replyReceived(byte[] data) {
         Message resp = new Message().deserialize(data, deserialized);
         ServerSession session = sessions.get(resp.getSrc());
+        
         boolean quorom = voter.vote(resp.getSrc(), session, resp.getSeqNumber(), resp.getData());
         if (quorom) {
+            
             int type = resp.getType();
             switch (type) {
                 case Message.HELLO_ACK:
@@ -62,15 +66,16 @@ public class ClientExecutorThree extends ClientExecutor implements Runnable, For
                 case Message.SEND_REQUEST:
                     break;
                 case Message.CHG_PREREPLICA:
+                    System.out.println("HERE RCV CHG PREREPLICA");
                     if (trinco) {
                         CoreConfiguration.print("changing pre-replica");
-                        updatePrereplica(resp.getData());
+//                        updatePrereplica(resp.getData());
                         trinco = false;
                     }
                     break;
                 case Message.ACK:
                     int ack = Integer.parseInt(new String(resp.getData()));
-                    cleanFromAck(ack);
+//                    cleanFromAck(ack);
                     break;
                 case Message.END_ACK:
                     finishTime = System.nanoTime();
@@ -95,7 +100,6 @@ public class ClientExecutorThree extends ClientExecutor implements Runnable, For
 
         }
     }
-
     private synchronized void updatePrereplica(byte[] data) {
         String[] addr = new String(data).split(":");
         CoreConfiguration.updateId(Integer.parseInt(addr[2]));
@@ -108,11 +112,11 @@ public class ClientExecutorThree extends ClientExecutor implements Runnable, For
         CoreConfiguration.print("in and out clear");
         this.pool = new WorkerPool(in, out, threadQueue, "crypto", CoreProperties.num_workers);
         CoreConfiguration.print("new worker pool");
-        CoreConfiguration.print("\n\n \tNeed to re-send=" + inAux.size());
-        in.addAll(inAux);
+//        CoreConfiguration.print("\n\n \tNeed to re-send=" + inAux.size());
+//        in.addAll(inAux);
         snd = new ClientTCPSend(addr[0], Integer.parseInt(addr[1]), out, inQueue, threadQueue);
         new Thread(snd).start();
         CoreConfiguration.print("ClientTCPSend (thread) start");
-        inAux.clear();
+//        inAux.clear();
     }
 }

@@ -1,13 +1,12 @@
 package core.modules.crypto;
 
-import core.components.workerpool.ThreadBlockQueue;
+import core.components.workerpool.DataBlockQueue;
 import core.components.workerpool.WorkerPool;
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
-import core.misc.Lock;
+import core.management.Lock;
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -21,70 +20,68 @@ public class tester {
 
     public static void main(String[] args) throws Exception {
         lock = new Lock();
-        prop = CoreProperties.getProperties("config/client.properties", "client");
-
+        prop = CoreProperties.getProperties("config/client1.properties", "client");
         conf = CoreConfiguration.getConfiguration(7, "client");
         int size = Integer.parseInt(args[0]);
         byte[] data = new byte[size];//980, 480, 80 
-        byte[] ser = new byte[size + Message.HEADER_SIZE + CoreProperties.signature_key_size + CoreProperties.hmac_key_size * 4];
-
-        ByteBuffer bufSer = ByteBuffer.allocate(ser.length);
+//        byte[] ser = new byte[size + Message.HEADER_SIZE + CoreProperties.signature_key_size + CoreProperties.hmac_key_size * 4];
+//        ByteBuffer bufSer = ByteBuffer.allocate(ser.length);
         Random r = new Random();
-
-        int warmup = 50000;
-        int rounds = 50000;
+        r.nextBytes(data);
+        int warmup = Integer.parseInt(args[1]);
+        int rounds = warmup;
+        int workers = Integer.parseInt(args[2]);
         ArrayBlockingQueue in = new ArrayBlockingQueue(warmup + rounds);
         ArrayBlockingQueue out = new ArrayBlockingQueue(warmup + rounds);
-
-        ThreadBlockQueue threadQueue = new ThreadBlockQueue(warmup, 1200);
-        WorkerPool testPool = new WorkerPool(in, out, threadQueue, "crypto2", Integer.parseInt(args[1]));
-        r.nextBytes(data);
-        //crypto = new CryptoSchemeFive();
-
-//        Receiver rcv = new Receiver(out, time, warmup, lock);
-//        Thread t = new Thread(rcv);
-//        t.start();
+        DataBlockQueue threadQueue = new DataBlockQueue(warmup, 1200);
+        WorkerPool testPool = new WorkerPool(in, out, threadQueue, "crypto2", workers);
+//        crypto = new CryptoSchemeFive();
         int i = 0;
         System.out.println("Data size=" + data.length);
+        System.out.println("Threads="+workers);
+        System.out.println("Rounds="+rounds);
         System.out.println("** warmup started...");
-        Message m = new Message(Message.ADD_ROUTE, 1, i, data);
+        Message m = new Message(Message.HELLO, 1, i, data);
         long time = System.nanoTime();
+        Receiver rcv = new Receiver(out, time, warmup, lock);
+        Thread t = new Thread(rcv);
+        t.start();
         while (i < warmup) {
             in.put(m);
-            //int s = m.serialize(ser, bufSer);
-            // crypto.clientSecureMessage(ser, s);
+//            int s = m.serialize(ser, bufSer);
+//            crypto.clientSecureMessage(ser, s);
             i++;
         }
-        System.out.println("Queue full in=" + in.size());
         while (in.size() != 0);
         double total = (System.nanoTime() - time) / 1000000000.0;
-        System.out.println("Queue empty in=" + in.size());
         System.out.println("** warmup ended...");
+        System.out.println("Data size=" + data.length);
+        System.out.println("Threads="+workers);
+        System.out.println("Rounds="+rounds);
         System.out.println("Signatures=" + i);
         System.out.println("Total=" + total + " secs");
         System.out.println("Signatures per second=" + i / total + " Total");
+        System.out.println("******************");
         //reset
-        //in.clear();
+        in.clear();
         out.clear();
         i = 0;
         time = System.nanoTime();
         int l = 0;
-
         while (i < rounds) {
-            // int s = m.serialize(ser, bufSer);
-            //crypto.clientSecureMessage(ser, s);
+//            int s = m.serialize(ser, bufSer);
+//            crypto.clientSecureMessage(ser, s);
             in.put(m);
             i++;
         }
-        System.out.println("Queue full in=" + in.size());
         System.out.println("waiting to finish...");
         while (in.size() != 0);
         total = (System.nanoTime() - time) / 1000000000.0;
-        System.out.println("Queue empty in=" + in.size());
+        System.out.println("** experiment ended...***");
         System.out.println("Signatures=" + i);
         System.out.println("Total=" + total + " secs");
         System.out.println("Signatures per second=" + i / total + " Total");
-        System.out.println("Rounds=" + rounds);
+        System.out.println("*************************");
     }
 
     static class Receiver implements Runnable {

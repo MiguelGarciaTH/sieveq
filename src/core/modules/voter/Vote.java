@@ -14,8 +14,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Vote {
 
     private int counter;
-    private CopyOnWriteArrayList<byte[]> messages;
-    private int Quorom;
+    private final CopyOnWriteArrayList<byte[]> messages;
+    private final int Quorom;
     private boolean clean;
 
     public Vote(int replicas, int quorom, byte[] message) {
@@ -34,12 +34,14 @@ public class Vote {
             for (byte[] msg : messages) {
                 if (Arrays.equals(msg, data)) {
                     counter++;
-                    break;
+//                    break;
                 }
             }
             messages.add(data);
-            if (counter == (Quorom + 1)) {
+//            System.out.println("Counter= " + counter);
+            if (counter == Quorom) {
                 clean = true;
+//                System.out.println("Counter = " + counter + " Locked ! ");
                 return true;
             }
         }

@@ -15,11 +15,7 @@ public class PreReplica {
 
     public PreReplica(int mode, int id) {
         this.ID = id;
-        switch (mode) {
-            case 3:
-                exec = new Thread(new PreReplicaExecutorThree(ID));
-                break;
-        }
+        exec = new Thread(new PreReplicaExecutor(ID));
     }
 
     public void start() {

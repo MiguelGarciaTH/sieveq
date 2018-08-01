@@ -5,8 +5,8 @@
  */
 package core.components.workerpool;
 
-import core.message.ByteArrayWrap;
-import core.message.Message;
+import core.management.ByteArrayWrap;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.modules.crypto.CryptoScheme;
@@ -23,15 +23,15 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class CryptoWorkerPrereplica extends Worker {
 
-    private CryptoScheme crypto;
-    private CryptoSchemeFactory fact = new CryptoSchemeFactory();
+    private final CryptoScheme crypto;
+    private final CryptoSchemeFactory fact = new CryptoSchemeFactory();
 
     private RemindTask task;
     private int numberofMessages = 0;
     private Timer timer;
     protected ByteBuffer deserialized = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
 
-    CryptoWorkerPrereplica(int tid, ArrayBlockingQueue toMac, ArrayBlockingQueue inQueue, ThreadBlockQueue threadBlock) {
+    CryptoWorkerPrereplica(int tid, ArrayBlockingQueue toMac, ArrayBlockingQueue inQueue, DataBlockQueue threadBlock) {
         super(tid, toMac, inQueue);
         this.crypto = fact.getNewCryptoScheme(CoreProperties.crypto_scheme);
 //        task = new RemindTask();
@@ -47,15 +47,11 @@ public class CryptoWorkerPrereplica extends Worker {
                 ByteArrayWrap data = (ByteArrayWrap) in.take();
                 if (Message.hasCrypto(data.getArr())) {
                     if (crypto.prefilterVerifyMessage(data.getArr(), data.getSize())) {
-                        //data = crypto.prefilterSecureMessage(data);
-                        //numberofMessages++;
                         out.put(data);
                     } else {
                         System.out.println("TID=" + tid + "  Corrupted!=" + new Message().deserialize(data.getArr(), deserialized));
                     }
                 } else {
-                    // numberofMessages++;
-                    //data = crypto.prefilterSecureMessage(data);
                     out.put(data);
                 }
             } catch (InterruptedException ex) {

@@ -4,6 +4,8 @@
  */
 package core.modules.voter;
 
+import core.management.ServerSession;
+
 /**
  *
  * @author miguel
@@ -11,21 +13,23 @@ package core.modules.voter;
 public class tester {
 
     public static void main(String[] args) {
-        
-        byte[] data1= new byte[]{1,2,3,5};
-        System.out.println("data1 " + data1.length);
-        
-        
-        data1 = new byte[]{1,2,3,5,5,6,7,2,3,5,5,6,7,2,3,5,5,6,7,2,3,5,5,6,7};
-        System.out.println("data1 " + data1.length);
-//        byte[] msg = new byte[]{1, 2};
-//        byte[] msg2 = new byte[]{1, 3};
+
+        byte[] msg1 = new byte[]{1, 2, 3, 5};
+        byte[] msg2 = new byte[]{1, 2, 3, 5, 5, 6, 7, 2, 3, 5, 5, 6, 7, 2, 3, 5, 5, 6, 7, 2, 3, 5, 5, 6, 7};
+
+        FastestVoter vote = new FastestVoter(4, 2);
+        System.out.println("1 " + vote.vote(0, msg1));
+        System.out.println("2 " + vote.vote(0, msg1));
+        System.out.println("3 " + vote.vote(0, msg1));
+        System.out.println("4 " + vote.vote(1, msg2));
+        System.out.println("4 " + vote.vote(1, msg2));
+
 //        SimpleVoter voter = new SimpleVoter(4, 2);
 //        int src = 0;
 //        int dst = 1;
 //        int sequenceNumber = 0;
 //        int sequenceNumber2 = 2;
-//        Session session = new Session(dst, 1);
+//        ServerSession session = new ServerSession(dst, src, new int[]{0,1,2,3}, src, true);
 //
 //
 //        for (int i = 0; i < 10; i++) {

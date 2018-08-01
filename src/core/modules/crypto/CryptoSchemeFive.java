@@ -5,7 +5,7 @@
  */
 package core.modules.crypto;
 
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import java.io.Serializable;
@@ -46,8 +46,10 @@ public class CryptoSchemeFive extends CryptoScheme implements Serializable{
             switch (CoreConfiguration.role) {
                 case "client":
                     this.description = "on";
-                    this.ks = new KeyStorage(CoreProperties.shared_key_path + CoreConfiguration.ID, CoreProperties.algorithm);
-                    this.key = ks.generateSecretKeyFromFile(CoreProperties.shared_key_path + CoreConfiguration.ID);
+                    //this.ks = new KeyStorage(CoreProperties.shared_key_path + CoreConfiguration.ID, CoreProperties.algorithm);
+                    //this.key = ks.generateSecretKeyFromFile(CoreProperties.shared_key_path + CoreConfiguration.ID);
+                    this.ks = new KeyStorage(CoreProperties.shared_key_path, CoreProperties.algorithm);
+                    this.key = ks.generateSecretKeyFromFile(CoreProperties.shared_key_path);
                     this.mac = Mac.getInstance(key.getAlgorithm());
                     this.mac.init(key);
                     this.macSize = this.mac.getMacLength();
@@ -59,8 +61,10 @@ public class CryptoSchemeFive extends CryptoScheme implements Serializable{
                     break;
                 case "prereplica":
                     this.description = "on";
-                    this.ks = new KeyStorage(CoreProperties.shared_key_path + CoreConfiguration.ID, CoreProperties.algorithm);
-                    this.key = ks.generateSecretKeyFromFile(CoreProperties.shared_key_path + CoreConfiguration.ID);
+                    this.ks = new KeyStorage(CoreProperties.shared_key_path, CoreProperties.algorithm);
+                    this.key = ks.generateSecretKeyFromFile(CoreProperties.shared_key_path);
+//                    this.ks = new KeyStorage(CoreProperties.shared_key_path + CoreConfiguration.ID, CoreProperties.algorithm);
+//                    this.key = ks.generateSecretKeyFromFile(CoreProperties.shared_key_path + CoreConfiguration.ID);
                     this.mac = Mac.getInstance(key.getAlgorithm());
                     this.mac.init(key);
                     this.macSize = this.mac.getMacLength();

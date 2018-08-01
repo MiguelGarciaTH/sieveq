@@ -13,14 +13,14 @@ public class Controller {
 
     private int ID;
     private Thread exec;
-    private ControllerOperator controller;
+//    private ControllerOperator controller;
 
     public Controller(int id, int mode, String controllerType) {
         this.ID = id;
-        controller = ControllerOperatorFactory.getControllerOperator(controllerType);
+//        controller = ControllerOperatorFactory.getControllerOperator(controllerType);
         switch (mode) {
             case 3:
-                exec = new Thread(new ControllerSMaRt(ID, controller));
+//                exec = new Thread(new ControllerSMaRt(ID, controller));
                 break;
         }
     }

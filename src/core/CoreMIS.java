@@ -4,7 +4,7 @@
  */
 package core;
 
-import core.components.attacker.Attacker;
+//import core.components.attacker.Attacker;
 import core.components.client.Client;
 import core.components.controller.Controller;
 import core.modules.crypto.CryptoScheme;
@@ -14,8 +14,6 @@ import core.management.CoreProperties;
 import core.components.prereplica.PreReplica;
 import core.components.replica.Replica;
 import core.components.server.Server;
-import core.modules.malicious.Malicious;
-import core.modules.malicious.MaliciousFactory;
 
 /**
  *
@@ -31,13 +29,12 @@ public class CoreMIS {
         //components
         Client client = null;
         Controller controller = null;
-        Attacker attacker = null;
+//        Attacker attacker = null;
         Server server = null;
         PreReplica prereplica = null;
         //modules
         CoreProperties prop = null;
         CryptoScheme crypto = null;
-        Malicious malicious = null;
 
         CoreConfiguration config = null;
 
@@ -45,7 +42,7 @@ public class CoreMIS {
         if (args.length <= 0) {
             System.out.println("Invalid number of arguments \n"
                     + "\tusage mode: {1|2|3} \n"
-                    + "\tcommand: mode {client|server|replica} \n"
+                    + "\tcommand: mode {attacker|client|server|replica} \n"
                     + "\targuments: mode option {id} \n"
                     + "\tproperties file \n"
                     + "\t[client's destiantion: {id dst}]\n");
@@ -55,7 +52,7 @@ public class CoreMIS {
             int mode = Integer.parseInt(args[0]);
             prop = CoreProperties.getProperties(args[3], command);
             config = CoreConfiguration.getConfiguration(ID, command);
-            malicious = MaliciousFactory.getMaliciousModule();
+            
             crypto = CryptoSchemeFactory.getCryptoScheme(CoreProperties.crypto_scheme);
             CoreConfiguration.setCryptoScheme(CoreProperties.crypto_scheme, crypto.getDescription());
             CoreConfiguration.setChannel(CoreProperties.channel);
@@ -72,7 +69,7 @@ public class CoreMIS {
                     server.start();
                     break;
                 case "replica":
-                    new Replica(mode, ID);
+                    new Replica(ID);
                     break;
                 case "prereplica":
                     prereplica = new PreReplica(mode, ID);
@@ -83,8 +80,14 @@ public class CoreMIS {
                     controller.start();
                     break;
                 case "attacker":
-                    attacker = new Attacker(mode, Integer.parseInt(args[4]));
-                    attacker.start();
+                    System.out.println("Args 0:" + args[0]); 
+                    System.out.println("Args 1:" + args[1]); 
+                    System.out.println("Args 2:" + args[2]); 
+                    System.out.println("Args 3:" + args[3]); 
+                    System.out.println("Args 4:" + args[4]); 
+                    System.out.println("UNCOMMENT!!");
+//                    attacker = new Attacker(mode, Integer.parseInt(args[4]));
+//                    attacker.start();
                     break;
 
             }

@@ -5,8 +5,8 @@
  */
 package core.components.workerpool;
 
-import core.message.Message;
-import core.message.ByteArrayWrap;
+import core.management.Message;
+import core.management.ByteArrayWrap;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import core.modules.crypto.CryptoScheme;
@@ -34,9 +34,9 @@ public class CryptoWorkerClient2 extends Worker {
     //private byte[] serl = new byte[Message.HEADER_SIZE + CoreProperties.message_size + CoreProperties.signature_key_size + CoreProperties.hmac_key_size];
     private byte[] serl = new byte[Message.HEADER_SIZE + CoreProperties.message_size + (CoreProperties.hmac_key_size * 4)];
     private ByteBuffer serialized = ByteBuffer.allocate(Message.HEADER_SIZE + 4500).order(ByteOrder.BIG_ENDIAN);
-    private ThreadBlockQueue threadQueue;
+    private DataBlockQueue threadQueue;
 
-    CryptoWorkerClient2(int tid, ArrayBlockingQueue in, ArrayBlockingQueue out, ThreadBlockQueue threadQueue) {
+    CryptoWorkerClient2(int tid, ArrayBlockingQueue in, ArrayBlockingQueue out, DataBlockQueue threadQueue) {
         super(tid, in, out);
         this.fact = new CryptoSchemeFactory();
         this.crypto = fact.getNewCryptoScheme(CoreProperties.crypto_scheme);

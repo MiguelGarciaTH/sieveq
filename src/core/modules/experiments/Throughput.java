@@ -5,7 +5,7 @@
  */
 package core.modules.experiments;
 
-import core.message.Message;
+import core.management.Message;
 import core.management.CoreConfiguration;
 import core.management.CoreProperties;
 import java.io.BufferedWriter;
@@ -38,6 +38,7 @@ public class Throughput implements Runnable {
     private DatagramSocket socket;
     private InetAddress IPAddress;
     private DatagramPacket sendPacket;
+    private double avg = 0;
 
     public Throughput(boolean target, BlockingQueue experimentQueue, String results) {
         try {
@@ -69,6 +70,7 @@ public class Throughput implements Runnable {
                 while (true) {
                     message = (Message) experimentQueue.take();
                     numberofMessages++;
+
                     if (message.getType() == Message.END_REQUEST) {
                         globalTimeFinit = System.nanoTime();
                         System.out.println("Experiment end request sent!!!!!");
@@ -106,8 +108,8 @@ public class Throughput implements Runnable {
             BufferedWriter out = new BufferedWriter(outputFileStream);
             int i = 0;
             out.write(" - msg/sec \n");
-      
-            List<Integer> sublist = messagesPerSec.subList(CoreProperties.warmup_rounds+1, messagesPerSec.size());
+
+            List<Integer> sublist = messagesPerSec.subList(CoreProperties.warmup_rounds + 1, messagesPerSec.size());
 //            System.out.println("init="+CoreProperties.warmup_rounds);
 //            System.out.println("end="+sublist.size() +" before="+messagesPerSec.size());
             for (Integer t : sublist) {
@@ -125,6 +127,11 @@ public class Throughput implements Runnable {
             double elapsedTime = ((double) (globalTimeFinit - globalTimeInit) / 1000000000.0);
             CoreConfiguration.print("[Experiments] write finished");
             CoreConfiguration.print("[Exp]Elapsed time=" + elapsedTime + " secs");
+            for (i=0; i<  sublist.size() ; i++) {
+                avg+=sublist.get(i);
+            }
+         
+            CoreConfiguration.print("[Exp]AVG =" + avg / sublist.size() + " secs");
         } catch (IOException ex) {
             CoreConfiguration.printException(this.getClass().getCanonicalName(), "writeFile2", ex.getMessage());
         }
@@ -142,19 +149,14 @@ public class Throughput implements Runnable {
 
     class RemindTaskTwo extends TimerTask {
 
-
         RemindTaskTwo() {
         }
 
         @Override
         public void run() {
-
-//            synchronized (this) {
-                messagesPerSec.add(numberofMessages);
-                sum += numberofMessages;
-                numberofMessages = 0;
-
-//            }
+            messagesPerSec.add(numberofMessages);
+            sum += numberofMessages;
+            numberofMessages = 0;
         }
     }
 
